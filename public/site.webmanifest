@@ -1,0 +1,8 @@
+{
+  "name": "Qualify Job Match",
+  "short_name": "Qualify",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }],
+  "theme_color": "#faf5ee",
+  "background_color": "#faf5ee",
+  "display": "standalone"
+}
