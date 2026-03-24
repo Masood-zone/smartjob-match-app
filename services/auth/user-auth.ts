@@ -13,10 +13,6 @@ export async function userSignUp({
     name,
     email,
     password,
-    callbackURL:
-      "/verify-otp?email=" +
-      encodeURIComponent(email) +
-      "&type=email-verification",
   });
 }
 

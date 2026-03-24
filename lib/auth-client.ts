@@ -1,7 +1,7 @@
 import { createAuthClient } from "better-auth/react";
 import { emailOTPClient } from "better-auth/client/plugins";
 
-const authBaseURL = process.env.NEXT_PUBLIC_AUTH_BASE_URL || "";
+const authBaseURL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 const emailOtpPlugin = emailOTPClient();
 
 export const authClient = createAuthClient({

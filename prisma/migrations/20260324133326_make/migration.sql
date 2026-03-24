@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "user" ALTER COLUMN "password" DROP NOT NULL,
+ALTER COLUMN "role" SET DEFAULT 'USER',
+ALTER COLUMN "emailVerified" SET DEFAULT true;
