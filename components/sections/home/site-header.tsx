@@ -1,13 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
 import { useSession } from "@/lib/auth-client";
+import { userLogout } from "@/services/auth/user-auth";
 import Image from "next/image";
+
+type HeaderUser = {
+  name?: string | null;
+  image?: string | null;
+  role?: "USER" | "JOB_SEEKER" | "EMPLOYER" | "ADMIN" | string;
+};
 
 const navigationItems = [
   { label: "Find Jobs", href: "/" },
@@ -17,10 +24,11 @@ const navigationItems = [
 ];
 
 export function SiteHeader() {
+  const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: session } = useSession();
-  const user = session?.user;
+  const user = session?.user as HeaderUser | undefined;
   const userInitials = user?.name
     ? user.name
         .split(" ")
@@ -44,6 +52,13 @@ export function SiteHeader() {
       {userInitials}
     </span>
   );
+
+  const handleLogout = async () => {
+    await userLogout();
+    setMobileMenuOpen(false);
+    router.push("/login");
+    router.refresh();
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#d8d0c8]/60 bg-[#faf5ee]/90 backdrop-blur-xl">
@@ -75,16 +90,32 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-3 sm:gap-4">
           {user ? (
-            <div className="flex items-center gap-3 rounded-full border border-[#d8d0c8]/70 bg-surface/80 px-2 py-1.5 pr-4 shadow-sm">
-              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary/10 ring-2 ring-primary/10">
-                {avatarContent}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 rounded-full border border-[#d8d0c8]/70 bg-surface/80 px-2 py-1.5 pr-4 shadow-sm">
+                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary/10 ring-2 ring-primary/10">
+                  {avatarContent}
+                </div>
+                <div className="hidden min-w-0 sm:block">
+                  <p className="truncate text-sm font-semibold text-on-surface">
+                    {user.name || "Signed in"}
+                  </p>
+                  <p className="text-xs text-on-surface-variant">
+                    {user.role === "EMPLOYER"
+                      ? "Employer Account"
+                      : user.role === "JOB_SEEKER"
+                        ? "Job Seeker Account"
+                        : "User"}
+                  </p>
+                </div>
               </div>
-              <div className="hidden min-w-0 sm:block">
-                <p className="truncate text-sm font-semibold text-on-surface">
-                  {user.name || "Signed in"}
-                </p>
-                <p className="text-xs text-on-surface-variant">Logged in</p>
-              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                className="cursor-pointer rounded-lg px-3 py-2 text-sm text-stone-600 transition-colors hover:text-primary"
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
             </div>
           ) : (
             <Link
@@ -142,16 +173,32 @@ export function SiteHeader() {
 
             {user ? (
               <div className="border-b border-[#d8d0c8]/60 px-5 py-5">
-                <div className="flex items-center gap-3 rounded-2xl border border-[#d8d0c8]/70 bg-surface/80 px-3 py-3 shadow-sm">
-                  <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-primary/10 ring-2 ring-primary/10">
-                    {avatarContent}
+                <div className="space-y-3 rounded-2xl border border-[#d8d0c8]/70 bg-surface/80 px-3 py-3 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-primary/10 ring-2 ring-primary/10">
+                      {avatarContent}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-on-surface">
+                        {user.name || "Signed in"}
+                      </p>
+                      <p className="text-xs text-on-surface-variant">
+                        {user.role === "EMPLOYER"
+                          ? "Employer Account"
+                          : user.role === "JOB_SEEKER"
+                            ? "Job Seeker Account"
+                            : "User"}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-on-surface">
-                      {user.name || "Signed in"}
-                    </p>
-                    <p className="text-xs text-on-surface-variant">Logged in</p>
-                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full cursor-pointer rounded-xl px-4 py-3 text-base text-stone-700 transition-colors hover:bg-primary/5 hover:text-primary"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </Button>
                 </div>
               </div>
             ) : null}
