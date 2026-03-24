@@ -11,6 +11,7 @@ enum Role {
   JOB_SEEKER
   EMPLOYER
   ADMIN
+  USER
 }
 
 enum QualificationLevel {
@@ -114,7 +115,7 @@ model Employer {
   id          String   @id @default(uuid())
   userId      String   @unique
   companyName String?
-  createdAt   DateTime @default(now())
+  role      Role @default(USER)
 
   user User  @relation(fields: [userId], references: [id])
   jobs Job[]

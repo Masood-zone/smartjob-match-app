@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
 import Image from "next/image";
 
@@ -36,16 +36,19 @@ export function HeroSection() {
           </div>
 
           <div className="flex flex-col gap-4 sm:flex-row">
-            <Button className="h-auto rounded-lg bg-primary px-8 py-4 text-base font-bold text-primary-foreground shadow-sm hover:bg-primary/90">
+            <Link
+              href="/register"
+              className="cursor-pointer inline-flex h-auto items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-base font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+            >
               Get Started as Job Seeker
               <MaterialSymbol icon="arrow_forward" className="text-[18px]" />
-            </Button>
-            <Button
-              variant="outline"
-              className="h-auto rounded-lg border-primary px-8 py-4 text-base font-bold text-primary hover:bg-primary/5"
+            </Link>
+            <Link
+              href="/register"
+              className="cursor-pointer inline-flex h-auto items-center justify-center rounded-lg border border-primary px-8 py-4 text-base font-bold text-primary transition-colors hover:bg-primary/5"
             >
               Post a Job as Employer
-            </Button>
+            </Link>
           </div>
 
           <div className="flex items-center gap-5 pt-4">

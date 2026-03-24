@@ -1,5 +1,4 @@
-import { Button } from "@/components/ui/button";
-
+import Link from "next/link";
 export function CtaSection() {
   return (
     <section id="cta" className="bg-primary px-6 py-24 text-on-primary">
@@ -16,15 +15,18 @@ export function CtaSection() {
         </p>
 
         <div className="flex flex-col gap-4 sm:flex-row">
-          <Button className="h-auto rounded-lg bg-surface px-10 py-4 text-base font-bold text-primary hover:bg-surface-dim">
+          <Link
+            href="/register"
+            className="cursor-pointer inline-flex h-auto items-center justify-center rounded-lg bg-surface px-10 py-4 text-base font-bold text-primary transition-colors hover:bg-surface-dim"
+          >
             Get Started Free
-          </Button>
-          <Button
-            variant="outline"
-            className="h-auto rounded-lg border-on-primary px-10 py-4 text-base font-bold text-on-primary hover:bg-on-primary/10"
+          </Link>
+          <Link
+            href="/about"
+            className="cursor-pointer inline-flex h-auto items-center justify-center rounded-lg border border-on-primary px-10 py-4 text-base font-bold text-on-primary transition-colors hover:bg-on-primary/10"
           >
             Learn More
-          </Button>
+          </Link>
         </div>
       </div>
     </section>

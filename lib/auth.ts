@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { emailOTP } from "better-auth/plugins";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 
@@ -6,6 +7,10 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+  emailVerification: {
+    overrideDefaultEmailVerification: true,
+    sendOnSignUp: true,
+  },
   user: {
     additionalFields: {
       role: {
@@ -18,28 +23,17 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
-    resetPasswordTokenExpiresIn: 15 * 60,
     autoSignIn: false,
-    // TODO: Implement email sending for password reset
-    // sendResetPassword: async ({ user, url, token }) => {
-    //   const baseMetadata = {
-    //     channels: {
-    //       email: {
-    //         to: user.email,
-    //         subject: `Reset Your Password - ${process.env.APP_NAME || "SIDS"}`,
-    //         status: "PENDING",
-    //       },
-    //     },
-    //   } as const;
-
-    //   //   const notification = await notificationService.create({
-    //   //     userId: user.id,
-    //   //     type: NotificationType.SYSTEM,
-    //   //     title: "Password reset requested",
-    //   //     message:
-    //   //       "We received a request to reset your password. Check your email for the reset link.",
-    //   //     metadata: baseMetadata,
-    //   //   });
-    // },
+    requireEmailVerification: true,
+    resetPasswordTokenExpiresIn: 15 * 60,
   },
+  plugins: [
+    emailOTP({
+      sendVerificationOnSignUp: true,
+      overrideDefaultEmailVerification: true,
+      async sendVerificationOTP({ email, otp, type }) {
+        console.info("[better-auth] OTP generated", { email, otp, type });
+      },
+    }),
+  ],
 });
