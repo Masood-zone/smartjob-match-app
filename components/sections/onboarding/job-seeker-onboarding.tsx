@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
 import { FormProvider, useForm } from "react-hook-form";
@@ -56,6 +57,7 @@ function JobSeekerOnboardingForm() {
     shouldUnregister: false,
     mode: "onSubmit",
   });
+  const [hoveredStepIndex, setHoveredStepIndex] = useState<number | null>(null);
 
   const { currentStep, data, setCurrentStep } = useJobSeekerOnboardingStore();
 
@@ -69,7 +71,7 @@ function JobSeekerOnboardingForm() {
   return (
     <FormProvider {...methods}>
       <main className="flex-1 overflow-hidden px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-        <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-400 flex-col gap-6">
+        <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-7xl flex-col gap-6">
           <header className="flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] border border-outline-variant bg-surface-container-lowest px-5 py-4 shadow-[0_12px_40px_rgba(58,48,42,0.05)]">
             <Link
               href="/"
@@ -96,15 +98,15 @@ function JobSeekerOnboardingForm() {
             <div className="flex items-center gap-2 text-on-surface-variant">
               <HoverInfoButton
                 label="How this page works"
-                title="Full page onboarding"
-                body="This layout is intentionally wide so the form can breathe across the page. Hover buttons replace the old sidebar notes and keep the page cleaner."
+                title="Onboarding flow"
+                body="Complete each step in order. The progress map shows where you are, and the help buttons explain the exact action for the step you are on."
               />
               <MaterialSymbol icon="close" className="text-[20px]" />
             </div>
           </header>
 
           <section className="grid flex-1 gap-6">
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(360px,0.8fr)]">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
               <div className="rounded-[1.75rem] border border-outline-variant bg-surface-container-lowest p-6 shadow-[0_18px_50px_rgba(58,48,42,0.06)] sm:p-8">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="max-w-3xl">
@@ -123,7 +125,15 @@ function JobSeekerOnboardingForm() {
                     <HoverInfoButton
                       label="Step guidance"
                       title={activeStep.label}
-                      body={activeStep.summary}
+                      body={
+                        currentStep === 0
+                          ? "Enter your identity, qualification level, skills, and work location preference. Use the pills and typeahead fields to keep things fast."
+                          : currentStep === 1
+                            ? "Add one or more experience entries, remove any that are not needed, and capture start and end dates for each role."
+                            : currentStep === 2
+                              ? "Choose your grade level with the pills, pick an institution from the list or type a custom one, and confirm the completion year."
+                              : "Review the data you entered, confirm the accuracy checkbox, and complete the onboarding flow."
+                      }
                     />
                     <HoverInfoButton
                       label="Saved data"
@@ -139,17 +149,69 @@ function JobSeekerOnboardingForm() {
                 </div>
               </div>
 
-              <div className="rounded-[1.75rem] border border-primary/10 bg-primary/5 p-6 shadow-[0_18px_50px_rgba(58,48,42,0.04)]">
-                <div className="flex items-center gap-3 text-primary">
-                  <MaterialSymbol icon="verified" className="text-[20px]" />
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em]">
-                    Store-backed wizard
+              <div className="rounded-[1.75rem] border border-outline-variant bg-surface-container-lowest p-6 shadow-[0_18px_50px_rgba(58,48,42,0.05)]">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 text-primary">
+                    <MaterialSymbol icon="route" className="text-[20px]" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em]">
+                      Progress map
+                    </p>
+                  </div>
+                  <HoverInfoButton
+                    label="Map help"
+                    title="Step map"
+                    body="Hover or tap the step pills to preview each stage. The current step stays highlighted so you can track your position at a glance."
+                  />
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  {steps.map((step, index) => {
+                    const isActive = index === currentStep;
+                    const isHovered = index === hoveredStepIndex;
+
+                    return (
+                      <button
+                        key={step.key}
+                        type="button"
+                        onClick={() => setCurrentStep(index)}
+                        onMouseEnter={() => setHoveredStepIndex(index)}
+                        onMouseLeave={() => setHoveredStepIndex(null)}
+                        onFocus={() => setHoveredStepIndex(index)}
+                        onBlur={() => setHoveredStepIndex(null)}
+                        className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all ${isActive ? "border-primary bg-primary/10 text-on-surface shadow-[0_10px_24px_rgba(194,101,42,0.12)]" : isHovered ? "border-primary/70 bg-primary/5 text-on-surface" : "border-outline-variant bg-surface text-on-surface-variant hover:border-primary/50 hover:bg-surface-container-low"}`}
+                      >
+                        <span className="flex items-center gap-3">
+                          <span
+                            className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${isActive ? "bg-primary text-on-primary" : isHovered ? "bg-primary/80 text-on-primary" : "bg-surface-container-highest text-on-surface-variant"}`}
+                          >
+                            {String(index + 1).padStart(2, "0")}
+                          </span>
+                          <span>
+                            <span className="block text-sm font-semibold">
+                              {step.label}
+                            </span>
+                            <span className="block text-xs text-on-surface-variant">
+                              {isHovered ? step.summary : step.summary}
+                            </span>
+                          </span>
+                        </span>
+                        <MaterialSymbol
+                          icon={isActive ? "check_circle" : "chevron_right"}
+                          className={`text-[18px] ${isActive ? "text-primary" : "text-outline"}`}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-4 rounded-[1.25rem] border border-outline-variant bg-surface-container-low p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
+                    {steps[hoveredStepIndex ?? currentStep].label}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-on-surface-variant">
+                    {steps[hoveredStepIndex ?? currentStep].summary}
                   </p>
                 </div>
-                <p className="mt-3 text-sm leading-6 text-on-surface-variant">
-                  The shared store preserves the full onboarding payload between
-                  steps, while React Hook Form handles the actual field state.
-                </p>
               </div>
             </div>
 
@@ -214,7 +276,7 @@ function HoverInfoButton({
         <MaterialSymbol icon="info" className="text-[16px]" />
         {label}
       </button>
-      <div className="pointer-events-none absolute right-0 top-full z-30 mt-2 w-80 translate-y-1 rounded-2xl border border-outline-variant bg-card p-4 text-left opacity-0 shadow-[0_18px_50px_rgba(58,48,42,0.18)] transition-all duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
+      <div className="pointer-events-none absolute bottom-full right-0 z-30 mb-2 w-80 translate-y-1 rounded-2xl border border-outline-variant bg-card p-4 text-left opacity-0 shadow-[0_18px_50px_rgba(58,48,42,0.18)] transition-all duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
         <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-primary">
           {title}
         </p>

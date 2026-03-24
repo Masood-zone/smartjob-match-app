@@ -1,11 +1,20 @@
 "use client";
 
-import { Controller, useFormContext } from "react-hook-form";
 import { useMemo } from "react";
+import { Controller, useFormContext, useWatch } from "react-hook-form";
 
-import { MaterialSymbol } from "@/components/common/MaterialSymbol";
 import { useJobSeekerOnboardingStore } from "@/stores/job-seeker-onboarding-store";
-import { qualificationLevels } from "@/utils/platform-data";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  getInstitutionsForQualification,
+  qualificationLevels,
+} from "@/utils/platform-data";
 
 import { Field } from "./field";
 import { YearField } from "./year-field";
@@ -18,10 +27,16 @@ export function QualificationsStep({
   onBack: () => void;
   onContinue: () => void;
 }) {
-  const { control, handleSubmit, watch } =
+  const { control, handleSubmit, setValue } =
     useFormContext<JobSeekerOnboardingValues>();
   const { saveStepData } = useJobSeekerOnboardingStore();
-  const selectedQualificationValue = watch("qualification");
+  const selectedQualificationValue = useWatch({
+    control,
+    name: "qualification",
+  });
+  const selectedGradeLevel = useWatch({ control, name: "gradeLevel" });
+  const institutionName = useWatch({ control, name: "institutionName" });
+
   const selectedQualification = useMemo(
     () =>
       qualificationLevels.find(
@@ -29,6 +44,14 @@ export function QualificationsStep({
       ) ?? qualificationLevels[3],
     [selectedQualificationValue],
   );
+  const institutionSuggestions = getInstitutionsForQualification(
+    selectedQualificationValue,
+  );
+  const institutionSelectValue = institutionSuggestions.includes(
+    institutionName,
+  )
+    ? institutionName
+    : "custom";
 
   const onSubmit = handleSubmit((values) => {
     saveStepData(values);
@@ -46,31 +69,57 @@ export function QualificationsStep({
             control={control}
             name="qualification"
             render={({ field }) => (
-              <div className="relative">
-                <select
-                  {...field}
-                  className="w-full appearance-none rounded-lg border border-outline-variant bg-surface px-4 py-3 text-on-surface outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/15"
-                >
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select qualification" />
+                </SelectTrigger>
+                <SelectContent>
                   {qualificationLevels.map((option) => (
-                    <option key={option.value} value={option.value}>
+                    <SelectItem key={option.value} value={option.value}>
                       {option.label}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-                <MaterialSymbol
-                  icon="expand_more"
-                  className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[20px] text-outline"
-                />
-              </div>
+                </SelectContent>
+              </Select>
             )}
           />
         </div>
 
-        <Field
-          name="institutionName"
-          label="Institution name"
-          placeholder="e.g. University of Ghana"
-        />
+        <div className="space-y-2">
+          <label className="block text-[10px] font-bold uppercase tracking-[0.28em] text-on-surface-variant">
+            Institution name
+          </label>
+          <Select
+            value={institutionSelectValue}
+            onValueChange={(value) => {
+              if (value === "custom") {
+                setValue("institutionName", "", { shouldDirty: true });
+                return;
+              }
+
+              setValue("institutionName", value, { shouldDirty: true });
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select institution" />
+            </SelectTrigger>
+            <SelectContent>
+              {institutionSuggestions.map((institution) => (
+                <SelectItem key={institution} value={institution}>
+                  {institution}
+                </SelectItem>
+              ))}
+              <SelectItem value="custom">Other / type custom</SelectItem>
+            </SelectContent>
+          </Select>
+          {institutionSelectValue === "custom" ? (
+            <Field
+              name="institutionName"
+              label="Custom institution"
+              placeholder="Type your institution"
+            />
+          ) : null}
+        </div>
 
         <Controller
           control={control}
@@ -83,12 +132,6 @@ export function QualificationsStep({
             />
           )}
         />
-
-        <Field
-          name="grade"
-          label="Grade (optional)"
-          placeholder="e.g. First Class"
-        />
       </div>
 
       <div className="rounded-[1.5rem] border border-outline-variant bg-surface-container-low p-4">
@@ -99,14 +142,22 @@ export function QualificationsStep({
           {selectedQualification.description}
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
-          {selectedQualification.gradeLevels.map((grade) => (
-            <span
-              key={grade}
-              className="rounded-full border border-outline-variant bg-surface px-3 py-1.5 text-xs font-semibold text-on-surface"
-            >
-              {grade}
-            </span>
-          ))}
+          {selectedQualification.gradeLevels.map((grade) => {
+            const active = selectedGradeLevel === grade;
+
+            return (
+              <button
+                key={grade}
+                type="button"
+                onClick={() =>
+                  setValue("gradeLevel", grade, { shouldDirty: true })
+                }
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${active ? "border-primary bg-primary text-on-primary" : "border-outline-variant bg-surface text-on-surface hover:border-primary hover:text-primary"}`}
+              >
+                {grade}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -116,7 +167,7 @@ export function QualificationsStep({
           onClick={onBack}
           className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface-variant transition-colors hover:text-primary"
         >
-          <MaterialSymbol icon="arrow_back" className="text-[18px]" />
+          <span className="text-[18px]">←</span>
           Previous step
         </button>
 
@@ -125,7 +176,7 @@ export function QualificationsStep({
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground shadow-[0_16px_34px_rgba(194,101,42,0.22)] transition-all hover:bg-primary/90"
         >
           Continue
-          <MaterialSymbol icon="arrow_forward" className="text-[18px]" />
+          <span className="text-[18px]">→</span>
         </button>
       </div>
     </form>

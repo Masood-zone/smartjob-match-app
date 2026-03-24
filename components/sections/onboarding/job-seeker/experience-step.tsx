@@ -19,7 +19,10 @@ export function ExperienceStep({
   const { control, handleSubmit, register, getValues, setValue } =
     useFormContext<JobSeekerOnboardingValues>();
   const { saveStepData } = useJobSeekerOnboardingStore();
-  const { fields, append } = useFieldArray({ control, name: "experience" });
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "experience",
+  });
 
   const onSubmit = handleSubmit((values) => {
     saveStepData(values);
@@ -42,7 +45,20 @@ export function ExperienceStep({
                 Current or latest role
               </h3>
             </div>
-            <MaterialSymbol icon="work" className="text-[20px] text-outline" />
+            <div className="flex items-center gap-2">
+              <MaterialSymbol
+                icon="work"
+                className="text-[20px] text-outline"
+              />
+              <button
+                type="button"
+                onClick={() => remove(index)}
+                className="inline-flex items-center gap-2 rounded-full border border-outline-variant px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant transition-colors hover:border-primary hover:text-primary"
+              >
+                <MaterialSymbol icon="delete" className="text-[16px]" />
+                Remove
+              </button>
+            </div>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">

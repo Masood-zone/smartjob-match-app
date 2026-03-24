@@ -31,7 +31,7 @@ export function ReviewStep({ onBack }: { onBack: () => void }) {
         <SummaryCard
           label="JobSeeker profile"
           title={data.qualification}
-          copy={`${data.skills.length} selected skill${data.skills.length === 1 ? "" : "s"}`}
+          copy={`${data.skills.length} selected skill${data.skills.length === 1 ? "" : "s"} · ${data.gradeLevel || "Grade level"}`}
         />
         <SummaryCard
           label="Experience"
@@ -44,12 +44,24 @@ export function ReviewStep({ onBack }: { onBack: () => void }) {
         <SummaryCard
           label="Education"
           title={data.institutionName || "Institution name"}
-          copy={`${data.qualification} · ${data.yearOfCompletion || "Year"}`}
+          copy={`${data.qualification} · ${data.gradeLevel || "Grade level"} · ${data.yearOfCompletion || "Year"}`}
         />
         <SummaryCard
           label="Location preference"
-          title={data.locationPreference || "Location preference"}
-          copy="Used to improve local and remote job ranking"
+          title={
+            data.locationMode === "REMOTE"
+              ? "Remote"
+              : data.locationMode === "PART_TIME"
+                ? "Part Time"
+                : [data.locationRegion, data.locationCity]
+                    .filter(Boolean)
+                    .join(", ") || "Specific location"
+          }
+          copy={
+            data.locationMode === "SPECIFIC_LOCATION"
+              ? "Select a region and city or type a new one if needed."
+              : "Used to align the roles you want with the work style you prefer."
+          }
         />
       </div>
 

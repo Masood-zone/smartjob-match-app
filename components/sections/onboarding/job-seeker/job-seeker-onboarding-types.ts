@@ -16,12 +16,14 @@ export type JobSeekerOnboardingValues = {
   lastName: string;
   email: string;
   qualification: JobSeekerQualification;
-  locationPreference: string;
+  locationMode: "REMOTE" | "PART_TIME" | "SPECIFIC_LOCATION";
+  locationRegion: string;
+  locationCity: string;
   skills: string[];
   experience: ExperienceEntry[];
   institutionName: string;
   yearOfCompletion?: number;
-  grade?: string;
+  gradeLevel?: string;
   accepted: boolean;
 };
 
@@ -30,7 +32,9 @@ export const jobSeekerOnboardingDefaultValues: JobSeekerOnboardingValues = {
   lastName: "",
   email: "",
   qualification: "DEGREE",
-  locationPreference: "Accra, hybrid or remote",
+  locationMode: "SPECIFIC_LOCATION",
+  locationRegion: "Greater Accra",
+  locationCity: "Accra",
   skills: ["Product Design", "Web Development", "Data Analysis"],
   experience: [
     {
@@ -45,6 +49,6 @@ export const jobSeekerOnboardingDefaultValues: JobSeekerOnboardingValues = {
   ],
   institutionName: "University of Ghana",
   yearOfCompletion: 2021,
-  grade: "First Class",
+  gradeLevel: "First Class",
   accepted: false,
 };

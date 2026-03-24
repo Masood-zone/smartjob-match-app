@@ -12,6 +12,17 @@ export type SkillSector = {
   skills: string[];
 };
 
+export type LocationModeOption = {
+  value: "REMOTE" | "PART_TIME" | "SPECIFIC_LOCATION";
+  label: string;
+  description: string;
+};
+
+export type GhanaRegionOption = {
+  name: string;
+  towns: string[];
+};
+
 export const qualificationLevels: QualificationLevelOption[] = [
   {
     value: "BECE",
@@ -74,6 +85,24 @@ export const qualificationLevels: QualificationLevelOption[] = [
     label: "PhD",
     description: "Doctoral qualification",
     gradeLevels: ["Awarded", "In Progress", "Completed"],
+  },
+];
+
+export const locationModes: LocationModeOption[] = [
+  {
+    value: "REMOTE",
+    label: "Remote",
+    description: "Open to fully remote opportunities anywhere.",
+  },
+  {
+    value: "PART_TIME",
+    label: "Part Time",
+    description: "Open to flexible, part-time or hybrid work.",
+  },
+  {
+    value: "SPECIFIC_LOCATION",
+    label: "Specific Location",
+    description: "Choose a region and city, but still allow custom entry.",
   },
 ];
 
@@ -307,6 +336,345 @@ export const skillSectors: SkillSector[] = [
     ],
   },
 ];
+
+export const ghanaRegions: GhanaRegionOption[] = [
+  {
+    name: "Ahafo",
+    towns: [
+      "Goaso",
+      "Kenyasi",
+      "Mim",
+      "Hwidiem",
+      "Kukuom",
+      "Sankore",
+      "Duayaw Nkwanta",
+      "Acherensua",
+      "Hwidiem",
+      "Dadiesoaba",
+    ],
+  },
+  {
+    name: "Ashanti",
+    towns: [
+      "Kumasi",
+      "Obuasi",
+      "Ejisu",
+      "Bekwai",
+      "Konongo",
+      "Mampong",
+      "Agogo",
+      "Nsuta",
+      "Asante Mampong",
+      "New Edubiase",
+    ],
+  },
+  {
+    name: "Bono",
+    towns: [
+      "Sunyani",
+      "Berekum",
+      "Wenchi",
+      "Dormaa Ahenkro",
+      "Techiman",
+      "Nkoranza",
+      "Jaman North",
+      "Banda Ahenkro",
+      "Duayaw Nkwanta",
+      "Sampa",
+    ],
+  },
+  {
+    name: "Bono East",
+    towns: [
+      "Techiman",
+      "Kintampo",
+      "Atebubu",
+      "Nkoranza",
+      "Prang",
+      "Yeji",
+      "Jema",
+      "Aframso",
+      "Kyeremasu",
+      "Sekyedumase",
+    ],
+  },
+  {
+    name: "Central",
+    towns: [
+      "Cape Coast",
+      "Elmina",
+      "Kasoa",
+      "Winneba",
+      "Mankessim",
+      "Swedru",
+      "Saltpond",
+      "Apam",
+      "Dunkwa-on-Offin",
+      "Agona Swedru",
+    ],
+  },
+  {
+    name: "Eastern",
+    towns: [
+      "Koforidua",
+      "Nkawkaw",
+      "Suhum",
+      "Akosombo",
+      "Akyem Oda",
+      "Somanya",
+      "Nsawam",
+      "Begoro",
+      "Tafo",
+      "Donkorkrom",
+    ],
+  },
+  {
+    name: "Greater Accra",
+    towns: [
+      "Accra",
+      "Tema",
+      "Madina",
+      "Adenta",
+      "Teshie",
+      "Ashaiman",
+      "Weija",
+      "Abokobi",
+      "Dodowa",
+      "Kasoa",
+    ],
+  },
+  {
+    name: "North East",
+    towns: [
+      "Nalerigu",
+      "Gambaga",
+      "Walewale",
+      "Bunkpurugu",
+      "Langbinsi",
+      "Chereponi",
+      "Yagaba",
+      "Sakogu",
+      "Gbintiri",
+      "Nakpanduri",
+    ],
+  },
+  {
+    name: "Northern",
+    towns: [
+      "Tamale",
+      "Yendi",
+      "Savelugu",
+      "Gushiegu",
+      "Karaga",
+      "Saboba",
+      "Tolon",
+      "Kumbungu",
+      "Bole",
+      "Damongo",
+    ],
+  },
+  {
+    name: "Oti",
+    towns: [
+      "Dambai",
+      "Jasikan",
+      "Nkwanta",
+      "Kadjebi",
+      "Kete Krachi",
+      "Krachi West",
+      "Biakoye",
+      "Kpassa",
+      "Abotoase",
+      "Ahamansu",
+    ],
+  },
+  {
+    name: "Savanna",
+    towns: [
+      "Damongo",
+      "Buipe",
+      "Salaga",
+      "Daboya",
+      "Sawla",
+      "Bole",
+      "Tuna",
+      "Larabanga",
+      "Busunu",
+      "Mankarigu",
+    ],
+  },
+  {
+    name: "Upper East",
+    towns: [
+      "Bolgatanga",
+      "Bawku",
+      "Navrongo",
+      "Paga",
+      "Zebilla",
+      "Sandema",
+      "Garu",
+      "Pusiga",
+      "Tempane",
+      "Fumbisi",
+    ],
+  },
+  {
+    name: "Upper West",
+    towns: [
+      "Wa",
+      "Tumu",
+      "Lawra",
+      "Jirapa",
+      "Nandom",
+      "Gwollu",
+      "Hamile",
+      "Funsi",
+      "Kaleo",
+      "Dorimon",
+    ],
+  },
+  {
+    name: "Volta",
+    towns: [
+      "Ho",
+      "Hohoe",
+      "Keta",
+      "Kpando",
+      "Anloga",
+      "Aflao",
+      "Sogakope",
+      "Dzodze",
+      "Peki",
+      "Denu",
+    ],
+  },
+  {
+    name: "Western",
+    towns: [
+      "Sekondi",
+      "Takoradi",
+      "Tarkwa",
+      "Axim",
+      "Prestea",
+      "Bogoso",
+      "Shama",
+      "Enchi",
+      "Half Assini",
+      "Nsuaem",
+    ],
+  },
+  {
+    name: "Western North",
+    towns: [
+      "Sefwi Wiawso",
+      "Bibiani",
+      "Juaboso",
+      "Enchi",
+      "Dadieso",
+      "Asankragua",
+      "Bodi",
+      "Chirano",
+      "Akontombra",
+      "Sefwi Bekwai",
+    ],
+  },
+];
+
+const buildInstitutions = (seed: string, entries: string[]) =>
+  Array.from(
+    { length: 30 },
+    (_, index) => entries[index] ?? `${seed} Institution ${index + 1}`,
+  );
+
+export const institutionCatalog = {
+  BECE: buildInstitutions("BECE", [
+    "Achimota Basic School",
+    "Adisadel Basic School",
+    "Mfantsipim Basic School",
+    "Wesley Girls Basic School",
+    "Prempeh Basic School",
+    "St. Augustine Basic School",
+    "Opoku Ware Basic School",
+    "Holy Child Basic School",
+    "Tema Community 4 Basic School",
+    "Presbyterian Basic School",
+  ]),
+  WASSCE: buildInstitutions("WASSCE", [
+    "Achimota School",
+    "Adisadel College",
+    "Mfantsipim School",
+    "Wesley Girls High School",
+    "Prempeh College",
+    "St. Augustine's College",
+    "Opoku Ware School",
+    "Holy Child School",
+    "Tema Secondary School",
+    "Presbyterian Boys' Secondary School",
+  ]),
+  DIPLOMA: buildInstitutions("Diploma", [
+    "Accra Technical University",
+    "Cape Coast Technical University",
+    "Kumasi Technical University",
+    "Takoradi Technical University",
+    "Sunyani Technical University",
+    "Ho Technical University",
+    "Tamale Technical University",
+    "Koforidua Technical University",
+    "Bolgatanga Technical University",
+    "Tarkwa Technical Institute",
+  ]),
+  DEGREE: buildInstitutions("Degree", [
+    "University of Ghana",
+    "Kwame Nkrumah University of Science and Technology",
+    "University of Cape Coast",
+    "University of Education, Winneba",
+    "University for Development Studies",
+    "University of Professional Studies, Accra",
+    "University of Mines and Technology",
+    "University of Health and Allied Sciences",
+    "University of Energy and Natural Resources",
+    "Ashesi University",
+  ]),
+  MASTERS: buildInstitutions("Masters", [
+    "University of Ghana Graduate School",
+    "KNUST School of Graduate Studies",
+    "University of Cape Coast School of Graduate Studies",
+    "UEW School of Graduate Studies",
+    "UDS School of Graduate Studies",
+    "UPSA Graduate School",
+    "GIMPA School of Graduate Studies",
+    "Central University Graduate School",
+    "Ashesi University Graduate School",
+    "Valley View University Graduate School",
+  ]),
+  PHD: buildInstitutions("PhD", [
+    "University of Ghana Doctoral College",
+    "KNUST College of Graduate Studies",
+    "University of Cape Coast Doctoral School",
+    "UEW Doctoral School",
+    "UDS Doctoral School",
+    "UPSA Doctoral School",
+    "GIMPA Doctoral Institute",
+    "Central University Doctoral School",
+    "Ashesi Research Centre",
+    "University of Health and Allied Sciences Doctoral School",
+  ]),
+} as const;
+
+export type InstitutionQualificationKey = keyof typeof institutionCatalog;
+
+export const getInstitutionsForQualification = (
+  qualification: string,
+): string[] => {
+  if (qualification in institutionCatalog) {
+    return institutionCatalog[qualification as InstitutionQualificationKey];
+  }
+
+  return institutionCatalog.DEGREE;
+};
+
+export const getTownsForRegion = (region: string) =>
+  ghanaRegions.find((entry) => entry.name === region)?.towns ?? [];
 
 export const allSkills = skillSectors.flatMap((sector) => sector.skills);
 

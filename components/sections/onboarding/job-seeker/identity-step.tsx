@@ -5,7 +5,20 @@ import { Controller, useFormContext, useWatch } from "react-hook-form";
 
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
 import { useJobSeekerOnboardingStore } from "@/stores/job-seeker-onboarding-store";
-import { qualificationLevels, skillSectors } from "@/utils/platform-data";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  getTownsForRegion,
+  ghanaRegions,
+  locationModes,
+  qualificationLevels,
+  skillSectors,
+} from "@/utils/platform-data";
 
 import { Field } from "./field";
 import { SkillExplorer } from "./skill-explorer";
@@ -17,8 +30,12 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
   const { saveStepData } = useJobSeekerOnboardingStore();
   const skills = useWatch({ control, name: "skills" }) ?? [];
   const qualification = useWatch({ control, name: "qualification" });
+  const locationMode = useWatch({ control, name: "locationMode" });
+  const locationRegion = useWatch({ control, name: "locationRegion" });
+  const locationCity = useWatch({ control, name: "locationCity" });
   const [skillQuery, setSkillQuery] = useState("");
   const [activeSector, setActiveSector] = useState("all");
+
   const currentQualification = useMemo(
     () =>
       qualificationLevels.find((item) => item.value === qualification) ??
@@ -27,11 +44,9 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
   );
 
   const visibleSectors = useMemo(() => {
-    const searchValue = `${activeSector} ${skillQuery}`.trim().toLowerCase();
+    const searchValue = skillQuery.trim().toLowerCase();
 
     return skillSectors.filter((sector) => {
-      const matchesSector =
-        activeSector === "all" || sector.id === activeSector;
       const matchesSearch = searchValue
         ? sector.label.toLowerCase().includes(searchValue) ||
           sector.skills.some((skill) =>
@@ -39,9 +54,9 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
           )
         : true;
 
-      return matchesSector && matchesSearch;
+      return matchesSearch;
     });
-  }, [activeSector, skillQuery]);
+  }, [skillQuery]);
 
   const toggleSkill = (skill: string) => {
     const currentSkills = getValues("skills");
@@ -65,6 +80,15 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
       });
     }
   };
+
+  const regionSuggestions = ghanaRegions.map((region) => region.name);
+  const citySuggestions = getTownsForRegion(locationRegion || "Greater Accra");
+  const regionSelectValue = regionSuggestions.includes(locationRegion)
+    ? locationRegion
+    : "custom";
+  const citySelectValue = citySuggestions.includes(locationCity)
+    ? locationCity
+    : "custom";
 
   const onSubmit = handleSubmit((values) => {
     saveStepData(values);
@@ -94,22 +118,18 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
             control={control}
             name="qualification"
             render={({ field }) => (
-              <div className="relative">
-                <select
-                  {...field}
-                  className="w-full appearance-none rounded-lg border border-outline-variant bg-surface px-4 py-3 text-on-surface outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/15"
-                >
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select qualification" />
+                </SelectTrigger>
+                <SelectContent>
                   {qualificationLevels.map((option) => (
-                    <option key={option.value} value={option.value}>
+                    <SelectItem key={option.value} value={option.value}>
                       {option.label}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-                <MaterialSymbol
-                  icon="expand_more"
-                  className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[20px] text-outline"
-                />
-              </div>
+                </SelectContent>
+              </Select>
             )}
           />
         </div>
@@ -181,11 +201,130 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
         />
       </div>
 
-      <Field
-        name="locationPreference"
-        label="Location preference"
-        placeholder="E.g. Accra, remote, or hybrid"
-      />
+      <div className="space-y-4 rounded-[1.5rem] border border-outline-variant bg-surface-container-low p-4">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-primary">
+              Work preference
+            </p>
+            <p className="mt-1 text-sm text-on-surface-variant">
+              Choose how and where you want to work.
+            </p>
+          </div>
+        </div>
+
+        <Controller
+          control={control}
+          name="locationMode"
+          render={({ field }) => (
+            <Select
+              value={field.value}
+              onValueChange={(value) => {
+                field.onChange(value);
+
+                if (value !== "SPECIFIC_LOCATION") {
+                  setValue("locationRegion", "", { shouldDirty: true });
+                  setValue("locationCity", "", { shouldDirty: true });
+                }
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select work preference" />
+              </SelectTrigger>
+              <SelectContent>
+                {locationModes.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+
+        {locationMode === "SPECIFIC_LOCATION" ? (
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="space-y-2">
+              <label className="block text-[10px] font-bold uppercase tracking-[0.28em] text-on-surface-variant">
+                Region
+              </label>
+              <Select
+                value={regionSelectValue}
+                onValueChange={(value) => {
+                  if (value === "custom") {
+                    setValue("locationRegion", "", { shouldDirty: true });
+                    setValue("locationCity", "", { shouldDirty: true });
+                    return;
+                  }
+
+                  setValue("locationRegion", value, { shouldDirty: true });
+                  setValue("locationCity", "", { shouldDirty: true });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a region" />
+                </SelectTrigger>
+                <SelectContent>
+                  {regionSuggestions.map((region) => (
+                    <SelectItem key={region} value={region}>
+                      {region}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="custom">Other / type custom</SelectItem>
+                </SelectContent>
+              </Select>
+              {regionSelectValue === "custom" ? (
+                <Field
+                  name="locationRegion"
+                  label="Custom region"
+                  placeholder="Type a region"
+                />
+              ) : null}
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-[10px] font-bold uppercase tracking-[0.28em] text-on-surface-variant">
+                City / town
+              </label>
+              <Select
+                value={citySelectValue}
+                onValueChange={(value) => {
+                  if (value === "custom") {
+                    setValue("locationCity", "", { shouldDirty: true });
+                    return;
+                  }
+
+                  setValue("locationCity", value, { shouldDirty: true });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a city" />
+                </SelectTrigger>
+                <SelectContent>
+                  {citySuggestions.map((city) => (
+                    <SelectItem key={city} value={city}>
+                      {city}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="custom">Other / type custom</SelectItem>
+                </SelectContent>
+              </Select>
+              {citySelectValue === "custom" ? (
+                <Field
+                  name="locationCity"
+                  label="Custom city"
+                  placeholder="Type a city or town"
+                />
+              ) : null}
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-[1.25rem] border border-dashed border-outline-variant bg-surface px-4 py-3 text-sm text-on-surface-variant">
+            {locationModes.find((option) => option.value === locationMode)
+              ?.description ?? "Choose how you want to work."}
+          </div>
+        )}
+      </div>
 
       <div className="flex items-center justify-end pt-2">
         <button

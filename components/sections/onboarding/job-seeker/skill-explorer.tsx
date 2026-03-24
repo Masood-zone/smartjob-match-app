@@ -115,7 +115,7 @@ export function SkillExplorer({
         {visibleSectors.map((sector) => (
           <article
             key={sector.id}
-            className="rounded-[1.25rem] border border-outline-variant bg-surface p-4"
+            className={`rounded-[1.25rem] border bg-surface p-4 transition-all ${activeSector === sector.id ? "border-primary shadow-[0_10px_24px_rgba(194,101,42,0.08)]" : "border-outline-variant"}`}
           >
             <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
