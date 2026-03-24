@@ -56,7 +56,7 @@ DROP COLUMN "taxDocUrl",
 DROP COLUMN "updatedAt",
 DROP COLUMN "website",
 DROP COLUMN "yearEstablished",
-ADD COLUMN     "role" "Role" NOT NULL DEFAULT 'USER';
+ADD COLUMN     "role" "Role" NOT NULL DEFAULT 'JOB_SEEKER';
 
 -- AlterTable
 ALTER TABLE "JobSeeker" DROP COLUMN "firstName",

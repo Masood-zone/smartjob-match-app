@@ -87,7 +87,7 @@ export function HeroSection() {
               height={500}
             />
 
-            <div className="absolute bottom-6 left-6 right-6 rounded-xl border border-outline-variant bg-surface/90 p-5 shadow-lg backdrop-blur-md">
+            {/* <div className="absolute bottom-6 left-6 right-6 rounded-xl border border-outline-variant bg-surface/90 p-5 shadow-lg backdrop-blur-md">
               <div className="mb-4 flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-[0.25em] text-primary">
                   Recent Match
@@ -110,7 +110,7 @@ export function HeroSection() {
                   </p>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
           <div className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />

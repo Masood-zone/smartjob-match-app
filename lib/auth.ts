@@ -7,10 +7,6 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-  emailVerification: {
-    overrideDefaultEmailVerification: true,
-    sendOnSignUp: true,
-  },
   user: {
     additionalFields: {
       role: {
@@ -23,14 +19,12 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
-    autoSignIn: false,
-    requireEmailVerification: true,
+    autoSignIn: true,
+    requireEmailVerification: false,
     resetPasswordTokenExpiresIn: 15 * 60,
   },
   plugins: [
     emailOTP({
-      sendVerificationOnSignUp: true,
-      overrideDefaultEmailVerification: true,
       async sendVerificationOTP({ email, otp, type }) {
         console.info("[better-auth] OTP generated", { email, otp, type });
       },

@@ -6,6 +6,8 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
+import { useSession } from "@/lib/auth-client";
+import Image from "next/image";
 
 const navigationItems = [
   { label: "Find Jobs", href: "/" },
@@ -17,6 +19,31 @@ const navigationItems = [
 export function SiteHeader() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: session } = useSession();
+  const user = session?.user;
+  const userInitials = user?.name
+    ? user.name
+        .split(" ")
+        .filter(Boolean)
+        .map((part) => part[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+    : "U";
+
+  const avatarContent = user?.image ? (
+    <Image
+      src={user.image}
+      alt={user.name ? `${user.name} avatar` : "User avatar"}
+      width={40}
+      height={40}
+      className="h-full w-full rounded-full object-cover"
+    />
+  ) : (
+    <span className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+      {userInitials}
+    </span>
+  );
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#d8d0c8]/60 bg-[#faf5ee]/90 backdrop-blur-xl">
@@ -47,12 +74,26 @@ export function SiteHeader() {
         </div>
 
         <div className="flex items-center gap-3 sm:gap-4">
-          <Link
-            href="/login"
-            className="cursor-pointer rounded-md px-3 py-2 text-sm text-stone-600 transition-colors hover:text-primary"
-          >
-            Sign In
-          </Link>
+          {user ? (
+            <div className="flex items-center gap-3 rounded-full border border-[#d8d0c8]/70 bg-surface/80 px-2 py-1.5 pr-4 shadow-sm">
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary/10 ring-2 ring-primary/10">
+                {avatarContent}
+              </div>
+              <div className="hidden min-w-0 sm:block">
+                <p className="truncate text-sm font-semibold text-on-surface">
+                  {user.name || "Signed in"}
+                </p>
+                <p className="text-xs text-on-surface-variant">Logged in</p>
+              </div>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="cursor-pointer rounded-md px-3 py-2 text-sm text-stone-600 transition-colors hover:text-primary"
+            >
+              Sign In
+            </Link>
+          )}
           <Link
             href="/register"
             className="cursor-pointer rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
@@ -72,7 +113,7 @@ export function SiteHeader() {
       </div>
 
       {mobileMenuOpen ? (
-        <div className="fixed inset-0 z-[60] md:hidden">
+        <div className="fixed inset-0 z-60 md:hidden">
           <button
             type="button"
             aria-label="Close navigation menu"
@@ -99,6 +140,22 @@ export function SiteHeader() {
               </Button>
             </div>
 
+            {user ? (
+              <div className="border-b border-[#d8d0c8]/60 px-5 py-5">
+                <div className="flex items-center gap-3 rounded-2xl border border-[#d8d0c8]/70 bg-surface/80 px-3 py-3 shadow-sm">
+                  <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-primary/10 ring-2 ring-primary/10">
+                    {avatarContent}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-on-surface">
+                      {user.name || "Signed in"}
+                    </p>
+                    <p className="text-xs text-on-surface-variant">Logged in</p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
             <nav className="flex flex-1 flex-col gap-2 px-5 py-6">
               {navigationItems.map((item) => (
                 <Link
@@ -116,13 +173,15 @@ export function SiteHeader() {
               ))}
 
               <div className="mt-6 border-t border-[#d8d0c8]/60 pt-6">
-                <Link
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="cursor-pointer block rounded-xl px-4 py-3 text-base text-stone-700 transition-colors hover:bg-primary/5 hover:text-primary"
-                >
-                  Sign In
-                </Link>
+                {user ? null : (
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="cursor-pointer block rounded-xl px-4 py-3 text-base text-stone-700 transition-colors hover:bg-primary/5 hover:text-primary"
+                  >
+                    Sign In
+                  </Link>
+                )}
                 <Link
                   href="/register"
                   onClick={() => setMobileMenuOpen(false)}

@@ -34,14 +34,14 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role      Role @default(JOB_SEEKER)
+  role      Role @default(USER)
   isActive     Boolean @default(true)
   createdAt DateTime @default(now())
 
   jobSeeker     JobSeeker?
   employer      Employer?
   mediaAssets   MediaAsset[]
-  emailVerified Boolean    @default(false)
+  emailVerified Boolean    @default(true)
   image         String?
   updatedAt     DateTime   @updatedAt
   sessions      Session[]

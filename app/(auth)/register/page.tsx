@@ -45,12 +45,8 @@ export default function RegisterPage() {
       return;
     }
 
-    toast.success(
-      "Account created. Check your email for the verification code.",
-    );
-    router.push(
-      `/verify-otp?email=${encodeURIComponent(values.email)}&type=email-verification`,
-    );
+    toast.success("Account created successfully");
+    router.push("/");
   };
 
   return (
