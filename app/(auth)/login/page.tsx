@@ -42,7 +42,7 @@ export default function LoginPage() {
     }
 
     toast.success("Signed in successfully");
-    router.push("/");
+    router.push("/onboarding/job-seeker");
   };
 
   return (

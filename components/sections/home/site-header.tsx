@@ -51,7 +51,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-3 sm:gap-4">
           <SessionAvatarBadge />
           <Link
-            href="/register"
+            href="/onboarding/employer"
             className="cursor-pointer rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
           >
             Post a Job
@@ -118,7 +118,7 @@ export function SiteHeader() {
 
               <div className="mt-6 border-t border-[#d8d0c8]/60 pt-6">
                 <Link
-                  href="/register"
+                  href="/onboarding/employer"
                   onClick={() => setMobileMenuOpen(false)}
                   className="cursor-pointer mt-2 block rounded-xl bg-primary px-4 py-3 text-center text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                 >

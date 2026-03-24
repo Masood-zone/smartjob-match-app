@@ -16,16 +16,16 @@ export function CtaSection() {
 
         <div className="flex flex-col gap-4 sm:flex-row">
           <Link
-            href="/register"
+            href="/onboarding/job-seeker"
             className="cursor-pointer inline-flex h-auto items-center justify-center rounded-lg bg-surface px-10 py-4 text-base font-bold text-primary transition-colors hover:bg-surface-dim"
           >
-            Get Started Free
+            Start Job Seeker Onboarding
           </Link>
           <Link
-            href="/about"
+            href="/onboarding/employer"
             className="cursor-pointer inline-flex h-auto items-center justify-center rounded-lg border border-on-primary px-10 py-4 text-base font-bold text-on-primary transition-colors hover:bg-on-primary/10"
           >
-            Learn More
+            Employer Onboarding
           </Link>
         </div>
       </div>

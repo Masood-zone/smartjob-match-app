@@ -37,14 +37,14 @@ export function HeroSection() {
 
           <div className="flex flex-col gap-4 sm:flex-row">
             <Link
-              href="/register"
+              href="/onboarding/job-seeker"
               className="cursor-pointer inline-flex h-auto items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-base font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
             >
               Get Started as Job Seeker
               <MaterialSymbol icon="arrow_forward" className="text-[18px]" />
             </Link>
             <Link
-              href="/register"
+              href="/onboarding/employer"
               className="cursor-pointer inline-flex h-auto items-center justify-center rounded-lg border border-primary px-8 py-4 text-base font-bold text-primary transition-colors hover:bg-primary/5"
             >
               Post a Job as Employer
