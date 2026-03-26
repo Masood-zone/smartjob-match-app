@@ -300,8 +300,6 @@ export function TextAreaField({
 
               if (typeof registrationRef === "function") {
                 registrationRef(element);
-              } else if (registrationRef) {
-                registrationRef.current = element;
               }
 
               if (element && autoResize) {
