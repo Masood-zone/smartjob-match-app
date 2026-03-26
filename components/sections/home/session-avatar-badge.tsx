@@ -27,6 +27,7 @@ type SessionUser = {
 
 type SessionAvatarBadgeProps = {
   onNavigate?: () => void;
+  mobile?: boolean;
 };
 
 function getUserInitials(name?: string | null) {
@@ -67,7 +68,10 @@ function getDashboardHref(role?: SessionUser["role"]) {
   return "/onboarding";
 }
 
-export function SessionAvatarBadge({ onNavigate }: SessionAvatarBadgeProps) {
+export function SessionAvatarBadge({
+  onNavigate,
+  mobile,
+}: SessionAvatarBadgeProps) {
   const router = useRouter();
   const {
     data: session,
@@ -130,14 +134,116 @@ export function SessionAvatarBadge({ onNavigate }: SessionAvatarBadgeProps) {
     );
   }
 
+  if (mobile) {
+    if (!user) {
+      return (
+        <div className="rounded-[1.3rem] border border-[#d8d0c8]/70 bg-white/80 p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <MaterialSymbol icon="person" className="text-[22px]" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-on-surface">
+                Sign in to continue
+              </p>
+              <p className="mt-1 text-sm text-on-surface-variant">
+                Access your dashboard, save progress, and pick up where you left
+                off.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            <Link
+              href="/login"
+              onClick={onNavigate}
+              className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/register"
+              onClick={onNavigate}
+              className="inline-flex items-center justify-center rounded-xl border border-[#d8d0c8]/70 px-4 py-3 text-sm font-semibold text-stone-700 transition-colors hover:border-primary/40 hover:text-primary"
+            >
+              Create account
+            </Link>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="rounded-[1.3rem] border border-[#d8d0c8]/70 bg-white/80 p-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 ring-2 ring-primary/10">
+            <Avatar
+              size="default"
+              className="h-12 w-12 border-0 bg-transparent"
+            >
+              <AvatarImage
+                src={user.image || undefined}
+                alt={user.name ? `${user.name} avatar` : "User avatar"}
+              />
+              <AvatarFallback className="bg-transparent text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                {getUserInitials(user.name)}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-on-surface">
+              {user.name || "Signed in"}
+            </p>
+            <p className="text-xs text-on-surface-variant">
+              {getRoleLabel(user.role)}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => {
+              onNavigate?.();
+              router.push(dashboardHref);
+            }}
+            className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Open dashboard
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onNavigate?.();
+              router.push("/onboarding");
+            }}
+            className="inline-flex items-center justify-center rounded-xl border border-[#d8d0c8]/70 px-4 py-3 text-sm font-semibold text-stone-700 transition-colors hover:border-primary/40 hover:text-primary"
+          >
+            Onboarding hub
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!user) {
     return (
-      <Link
-        href="/login"
-        className="cursor-pointer rounded-md px-3 py-2 text-sm text-stone-600 transition-colors hover:text-primary"
-      >
-        Sign In
-      </Link>
+      <>
+        <Link
+          href="/login"
+          className="hidden cursor-pointer rounded-md px-3 py-2 text-sm text-stone-600 transition-colors hover:text-primary sm:inline-flex"
+        >
+          Sign In
+        </Link>
+        <Link
+          href="/login"
+          aria-label="Sign in"
+          className="inline-flex cursor-pointer items-center justify-center rounded-full border border-[#d8d0c8]/70 bg-surface/80 p-2 text-stone-600 shadow-sm transition-colors hover:border-primary/40 hover:text-primary sm:hidden"
+        >
+          <MaterialSymbol icon="login" className="text-[18px]" />
+        </Link>
+      </>
     );
   }
 
