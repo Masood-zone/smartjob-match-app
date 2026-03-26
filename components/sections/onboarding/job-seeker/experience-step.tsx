@@ -1,8 +1,10 @@
 "use client";
 
 import { useFieldArray, useFormContext } from "react-hook-form";
+import { toast } from "sonner";
 
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
+import { saveJobSeekerOnboardingStep } from "@/services/onboarding/job-seeker-onboarding";
 import { useJobSeekerOnboardingStore } from "@/stores/job-seeker-onboarding-store";
 
 import { DateField } from "./date-field";
@@ -26,7 +28,17 @@ export function ExperienceStep({
 
   const onSubmit = handleSubmit((values) => {
     saveStepData(values);
-    onContinue();
+    return saveJobSeekerOnboardingStep({
+      stepKey: "experience",
+      values,
+    })
+      .then(() => {
+        toast.success("Experience step saved");
+        onContinue();
+      })
+      .catch((error: Error) => {
+        toast.error(error.message || "Unable to save experience step");
+      });
   });
 
   return (

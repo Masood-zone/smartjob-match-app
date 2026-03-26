@@ -2,8 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
+import { toast } from "sonner";
 
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
+import { saveJobSeekerOnboardingStep } from "@/services/onboarding/job-seeker-onboarding";
 import { useJobSeekerOnboardingStore } from "@/stores/job-seeker-onboarding-store";
 import {
   Select,
@@ -92,7 +94,17 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
 
   const onSubmit = handleSubmit((values) => {
     saveStepData(values);
-    onContinue();
+    return saveJobSeekerOnboardingStep({
+      stepKey: "identity",
+      values,
+    })
+      .then(() => {
+        toast.success("Identity step saved");
+        onContinue();
+      })
+      .catch((error: Error) => {
+        toast.error(error.message || "Unable to save identity step");
+      });
   });
 
   return (

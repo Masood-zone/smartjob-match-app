@@ -2,7 +2,9 @@
 
 import { useMemo } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
+import { toast } from "sonner";
 
+import { saveJobSeekerOnboardingStep } from "@/services/onboarding/job-seeker-onboarding";
 import { useJobSeekerOnboardingStore } from "@/stores/job-seeker-onboarding-store";
 import {
   Select,
@@ -55,7 +57,17 @@ export function QualificationsStep({
 
   const onSubmit = handleSubmit((values) => {
     saveStepData(values);
-    onContinue();
+    return saveJobSeekerOnboardingStep({
+      stepKey: "qualifications",
+      values,
+    })
+      .then(() => {
+        toast.success("Qualification step saved");
+        onContinue();
+      })
+      .catch((error: Error) => {
+        toast.error(error.message || "Unable to save qualification step");
+      });
   });
 
   return (

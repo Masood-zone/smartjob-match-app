@@ -1,8 +1,10 @@
 "use client";
 
 import { Controller, useFormContext } from "react-hook-form";
+import { toast } from "sonner";
 
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
+import { saveJobSeekerOnboardingStep } from "@/services/onboarding/job-seeker-onboarding";
 import { useJobSeekerOnboardingStore } from "@/stores/job-seeker-onboarding-store";
 
 import { SummaryCard } from "./summary-card";
@@ -15,9 +17,19 @@ export function ReviewStep({ onBack }: { onBack: () => void }) {
 
   const onSubmit = handleSubmit((values) => {
     saveStepData(values);
-    console.log("Job Seeker Onboarding Payload", values);
-    console.log("Job Seeker Store Snapshot", data);
-    console.log("Job Seeker RHF Snapshot", getValues());
+    return saveJobSeekerOnboardingStep({
+      stepKey: "review",
+      values,
+    })
+      .then(() => {
+        toast.success("Onboarding completed and saved");
+        console.log("Job Seeker Onboarding Payload", values);
+        console.log("Job Seeker Store Snapshot", data);
+        console.log("Job Seeker RHF Snapshot", getValues());
+      })
+      .catch((error: Error) => {
+        toast.error(error.message || "Unable to complete onboarding");
+      });
   });
 
   return (

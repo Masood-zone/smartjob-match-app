@@ -2,6 +2,16 @@ import type { QualificationLevelOption } from "@/utils/platform-data";
 
 export type JobSeekerQualification = QualificationLevelOption["value"];
 
+export const jobSeekerOnboardingStepKeys = [
+  "identity",
+  "experience",
+  "qualifications",
+  "review",
+] as const;
+
+export type JobSeekerOnboardingStepKey =
+  (typeof jobSeekerOnboardingStepKeys)[number];
+
 export type ExperienceEntry = {
   jobTitle: string;
   companyName: string;
