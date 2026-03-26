@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-import { MaterialSymbol } from "@/components/common/MaterialSymbol";
 import { AccessPromptDialog } from "@/components/sections/auth/access-prompt-dialog";
 import { useSession } from "@/lib/auth-client";
 

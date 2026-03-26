@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { OnboardingStatus, Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { notificationsService } from "@/lib/notifications";
 
 const stepRecordFields = {
   "basic-info": "basicInfoData",
@@ -140,6 +141,20 @@ export async function POST(request: Request) {
         return onboarding;
       },
     );
+
+    if (stepKey === "review" && values.accepted) {
+      const companyName =
+        typeof values.companyName === "string" ? values.companyName.trim() : "";
+
+      try {
+        await notificationsService.sendEmployerWelcomeEmail({
+          email,
+          name: companyName || undefined,
+        });
+      } catch (error) {
+        console.error("Failed to send employer welcome email:", error);
+      }
+    }
 
     return NextResponse.json({
       ok: true,

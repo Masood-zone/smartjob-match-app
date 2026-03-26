@@ -46,6 +46,23 @@ export default function RegisterPage() {
     }
 
     toast.success("Account created successfully");
+
+    try {
+      await fetch("/api/notifications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          kind: "new-user",
+          email: values.email,
+          name: values.name,
+        }),
+      });
+    } catch {
+      // Keep the signup flow moving even if the welcome email cannot be sent.
+    }
+
     router.push("/login");
   };
 

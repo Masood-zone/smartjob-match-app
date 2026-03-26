@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { notificationsService } from "@/lib/notifications";
 
 const stepRecordFields = {
   identity: "identityData",
@@ -65,84 +67,106 @@ export async function POST(request: Request) {
         stepKey === "review" && values.accepted ? new Date() : undefined,
     };
 
-    const result = await prisma.$transaction(async (tx) => {
-      const onboardingTx = tx as typeof tx & {
-        user: any;
-        jobSeekerOnboarding: any;
-        jobSeeker: any;
-      };
+    const result = await prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        const onboardingTx = tx as Prisma.TransactionClient & {
+          user: Prisma.TransactionClient["user"];
+          jobSeekerOnboarding: Prisma.TransactionClient["jobSeekerOnboarding"];
+          jobSeeker: Prisma.TransactionClient["jobSeeker"];
+        };
 
-      const onboarding = await onboardingTx.jobSeekerOnboarding.upsert({
-        where: { userId: user.id },
-        create: {
-          userId: user.id,
-          currentStep: onboardingData.currentStep,
-          currentStepKey: onboardingData.currentStepKey,
-          draftData: onboardingData.draftData,
-          identityData:
-            stepKey === "identity" ? onboardingData.draftData : undefined,
-          experienceData:
-            stepKey === "experience" ? onboardingData.draftData : undefined,
-          qualificationData:
-            stepKey === "qualifications" ? onboardingData.draftData : undefined,
-          reviewData:
-            stepKey === "review" ? onboardingData.draftData : undefined,
-          status: onboardingData.status,
-          completedAt: onboardingData.completedAt,
-        },
-        update: {
-          currentStep: onboardingData.currentStep,
-          currentStepKey: onboardingData.currentStepKey,
-          draftData: onboardingData.draftData,
-          identityData:
-            stepKey === "identity" ? onboardingData.draftData : undefined,
-          experienceData:
-            stepKey === "experience" ? onboardingData.draftData : undefined,
-          qualificationData:
-            stepKey === "qualifications" ? onboardingData.draftData : undefined,
-          reviewData:
-            stepKey === "review" ? onboardingData.draftData : undefined,
-          status: onboardingData.status,
-          completedAt: onboardingData.completedAt,
-        },
-      });
+        const onboarding = await onboardingTx.jobSeekerOnboarding.upsert({
+          where: { userId: user.id },
+          create: {
+            userId: user.id,
+            currentStep: onboardingData.currentStep,
+            currentStepKey: onboardingData.currentStepKey,
+            draftData: onboardingData.draftData,
+            identityData:
+              stepKey === "identity" ? onboardingData.draftData : undefined,
+            experienceData:
+              stepKey === "experience" ? onboardingData.draftData : undefined,
+            qualificationData:
+              stepKey === "qualifications"
+                ? onboardingData.draftData
+                : undefined,
+            reviewData:
+              stepKey === "review" ? onboardingData.draftData : undefined,
+            status: onboardingData.status,
+            completedAt: onboardingData.completedAt,
+          },
+          update: {
+            currentStep: onboardingData.currentStep,
+            currentStepKey: onboardingData.currentStepKey,
+            draftData: onboardingData.draftData,
+            identityData:
+              stepKey === "identity" ? onboardingData.draftData : undefined,
+            experienceData:
+              stepKey === "experience" ? onboardingData.draftData : undefined,
+            qualificationData:
+              stepKey === "qualifications"
+                ? onboardingData.draftData
+                : undefined,
+            reviewData:
+              stepKey === "review" ? onboardingData.draftData : undefined,
+            status: onboardingData.status,
+            completedAt: onboardingData.completedAt,
+          },
+        });
 
-      if (stepKey === "review" && values.accepted) {
-        const fullName = [values.firstName, values.lastName]
-          .filter(Boolean)
-          .join(" ")
-          .trim();
+        if (stepKey === "review" && values.accepted) {
+          const fullName = [values.firstName, values.lastName]
+            .filter(Boolean)
+            .join(" ")
+            .trim();
 
-        if (fullName) {
-          await onboardingTx.user.update({
-            where: { id: user.id },
-            data: { name: fullName, role: "JOB_SEEKER" },
-          });
-        } else {
-          await onboardingTx.user.update({
-            where: { id: user.id },
-            data: { role: "JOB_SEEKER" },
-          });
+          if (fullName) {
+            await onboardingTx.user.update({
+              where: { id: user.id },
+              data: { name: fullName, role: "JOB_SEEKER" },
+            });
+          } else {
+            await onboardingTx.user.update({
+              where: { id: user.id },
+              data: { role: "JOB_SEEKER" },
+            });
+          }
+
+          if (values.qualification && Array.isArray(values.skills)) {
+            await onboardingTx.jobSeeker.upsert({
+              where: { userId: user.id },
+              create: {
+                userId: user.id,
+                qualification: values.qualification as never,
+                skills: values.skills,
+              },
+              update: {
+                qualification: values.qualification as never,
+                skills: values.skills,
+              },
+            });
+          }
         }
 
-        if (values.qualification && Array.isArray(values.skills)) {
-          await onboardingTx.jobSeeker.upsert({
-            where: { userId: user.id },
-            create: {
-              userId: user.id,
-              qualification: values.qualification as never,
-              skills: values.skills,
-            },
-            update: {
-              qualification: values.qualification as never,
-              skills: values.skills,
-            },
-          });
-        }
+        return onboarding;
+      },
+    );
+
+    if (stepKey === "review" && values.accepted) {
+      const fullName = [values.firstName, values.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+
+      try {
+        await notificationsService.sendJobSeekerWelcomeEmail({
+          email,
+          name: fullName || undefined,
+        });
+      } catch (error) {
+        console.error("Failed to send job seeker welcome email:", error);
       }
-
-      return onboarding;
-    });
+    }
 
     return NextResponse.json({
       ok: true,
