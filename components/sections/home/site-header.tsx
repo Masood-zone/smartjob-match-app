@@ -153,11 +153,11 @@ export function SiteHeader() {
           <button
             type="button"
             aria-label="Close navigation menu"
-            className="absolute inset-0 cursor-pointer bg-stone-950/70 backdrop-blur-md"
+            className="absolute inset-0 cursor-pointer bg-stone-950/82 backdrop-blur-xl"
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          <div className="fixed inset-y-0 right-0 flex h-dvh w-[min(100vw,26rem)] flex-col border-l border-[#d8d0c8]/70 bg-[#fffaf4] shadow-[0_24px_60px_rgba(53,38,31,0.22)]">
+          <div className="fixed inset-y-0 right-0 flex h-dvh w-full flex-col border-l border-[#d8d0c8]/70 bg-[#fffaf4] shadow-[0_24px_60px_rgba(53,38,31,0.22)] sm:w-[min(100vw,26rem)]">
             <div className="flex items-center justify-between border-b border-[#d8d0c8]/60 px-5 py-4 sm:px-6">
               <div>
                 <span className="font-serif text-2xl font-bold tracking-tight text-primary">
@@ -203,23 +203,6 @@ export function SiteHeader() {
                   {item.label}
                 </Link>
               ))}
-
-              <div className="mt-6 space-y-3 border-t border-[#d8d0c8]/60 pt-6">
-                <Link
-                  href={primaryCta.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block rounded-[1.1rem] bg-primary px-4 py-4 text-center text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                >
-                  {primaryCta.label}
-                </Link>
-                <Link
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block rounded-[1.1rem] border border-[#d8d0c8]/70 bg-white/70 px-4 py-4 text-center text-base font-semibold text-stone-700 transition-colors hover:border-primary/30 hover:text-primary"
-                >
-                  Sign in
-                </Link>
-              </div>
             </nav>
           </div>
         </div>
