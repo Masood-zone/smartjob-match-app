@@ -41,12 +41,12 @@ import { useSession } from "@/lib/auth-client";
 import { useStoreEmployerOnboardingStep } from "@/services/onboarding/employer-onboarding";
 import { useEmployerOnboardingStore } from "@/stores/employer-onboarding-store";
 
-import { EmployerSuccessDialog } from "./index";
 import {
   employerOnboardingDefaultValues,
   type EmployerOnboardingStepKey,
   type EmployerOnboardingValues,
 } from "./employer-onboarding-types";
+import { EmployerSuccessDialog } from "./employer-success-dialog";
 
 type SessionUser = {
   name?: string | null;

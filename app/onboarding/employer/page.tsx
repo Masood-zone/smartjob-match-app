@@ -1,5 +1,5 @@
-import { EmployerOnboarding } from "@/components/sections/onboarding/employer-onboarding";
+import { redirect } from "next/navigation";
 
 export default function EmployerOnboardingPage() {
-  return <EmployerOnboarding />;
+  redirect("/onboarding/employer/welcome");
 }

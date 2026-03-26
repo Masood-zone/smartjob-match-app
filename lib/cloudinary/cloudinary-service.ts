@@ -56,7 +56,7 @@ export async function uploadBuffer(args: {
         use_filename: true,
         unique_filename: true,
       },
-      (error, result) => {
+      (error: unknown, result: unknown) => {
         if (error) reject(error);
         else resolve(result as unknown as CloudinaryUploadResponse);
       },
