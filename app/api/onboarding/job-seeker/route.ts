@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
+import { OnboardingStatus, Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { notificationsService } from "@/lib/notifications";
@@ -56,13 +56,17 @@ export async function POST(request: Request) {
       );
     }
 
+    const draftData = values as Prisma.InputJsonValue;
+
     const onboardingData = {
       currentStep,
       currentStepKey: stepKey,
-      draftData: values,
-      [stepRecordFields[stepKey]]: values,
+      draftData,
+      [stepRecordFields[stepKey]]: draftData,
       status:
-        stepKey === "review" && values.accepted ? "COMPLETED" : "IN_PROGRESS",
+        stepKey === "review" && values.accepted
+          ? OnboardingStatus.COMPLETED
+          : OnboardingStatus.IN_PROGRESS,
       completedAt:
         stepKey === "review" && values.accepted ? new Date() : undefined,
     };
