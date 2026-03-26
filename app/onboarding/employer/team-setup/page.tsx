@@ -12,6 +12,7 @@ import {
   AsideCard,
   AvatarBadge,
   Field,
+  LoadingSpinner,
   StepHeader,
 } from "@/components/sections/onboarding/employer/employer-ui";
 import { useSession } from "@/lib/auth-client";
@@ -30,6 +31,7 @@ export default function EmployerTeamSetupPage() {
     (state) => state.saveStepData,
   );
   const saveStepMutation = useStoreEmployerOnboardingStep();
+  const isStepSaving = saveStepMutation.isPending;
 
   const methods = useForm<EmployerOnboardingValues>({
     defaultValues: savedData ?? employerOnboardingDefaultValues,
@@ -272,10 +274,20 @@ export default function EmployerTeamSetupPage() {
             <button
               type="button"
               onClick={handleContinue}
-              className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+              disabled={isStepSaving}
+              className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Continue to Review
-              <span aria-hidden="true">→</span>
+              {isStepSaving ? (
+                <>
+                  <LoadingSpinner className="border-white/80" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  Continue to Review
+                  <span aria-hidden="true">→</span>
+                </>
+              )}
             </button>
           </div>
         </div>

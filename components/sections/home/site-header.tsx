@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
+import { useSession } from "@/lib/auth-client";
 import { SessionAvatarBadge } from "./session-avatar-badge";
 
 const navigationItems = [
@@ -15,10 +16,61 @@ const navigationItems = [
   { label: "Companies", href: "/companies" },
 ];
 
+type HeaderRole = "USER" | "JOB_SEEKER" | "EMPLOYER" | "ADMIN";
+
+type HeaderSessionUser = {
+  role?: string | null;
+};
+
+function normalizeRole(role?: string | null): HeaderRole | undefined {
+  const normalizedRole = role?.toUpperCase();
+
+  if (
+    normalizedRole === "USER" ||
+    normalizedRole === "JOB_SEEKER" ||
+    normalizedRole === "EMPLOYER" ||
+    normalizedRole === "ADMIN"
+  ) {
+    return normalizedRole;
+  }
+
+  return undefined;
+}
+
+function getHeaderCta(role?: HeaderRole) {
+  switch (role) {
+    case "JOB_SEEKER":
+      return {
+        label: "Apply for Job Listings",
+        href: "/onboarding/job-seeker",
+      };
+    case "EMPLOYER":
+      return {
+        label: "Post a Job",
+        href: "/onboarding/employer",
+      };
+    case "ADMIN":
+      return {
+        label: "System Dashboard",
+        href: "/dashboard",
+      };
+    case "USER":
+    default:
+      return {
+        label: "Post a Job",
+        href: "/onboarding/employer",
+      };
+  }
+}
+
 export function SiteHeader() {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const user = session?.user as HeaderSessionUser | undefined;
+  const userRole = normalizeRole(user?.role);
+  const primaryCta = getHeaderCta(userRole);
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#d8d0c8]/60 bg-[#faf5ee]/90 backdrop-blur-xl">
@@ -51,10 +103,10 @@ export function SiteHeader() {
         <div className="flex items-center gap-3 sm:gap-4">
           <SessionAvatarBadge />
           <Link
-            href="/onboarding/employer"
+            href={primaryCta.href}
             className="cursor-pointer rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
           >
-            Post a Job
+            {primaryCta.label}
           </Link>
           <Button
             variant="ghost"
@@ -118,11 +170,11 @@ export function SiteHeader() {
 
               <div className="mt-6 border-t border-[#d8d0c8]/60 pt-6">
                 <Link
-                  href="/onboarding/employer"
+                  href={primaryCta.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className="cursor-pointer mt-2 block rounded-xl bg-primary px-4 py-3 text-center text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                 >
-                  Post a Job
+                  {primaryCta.label}
                 </Link>
               </div>
             </nav>

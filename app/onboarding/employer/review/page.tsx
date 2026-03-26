@@ -10,6 +10,7 @@ import { OnboardingFrame } from "@/components/sections/onboarding/employer/emplo
 import {
   AsideCard,
   AvatarBadge,
+  LoadingSpinner,
 } from "@/components/sections/onboarding/employer/employer-ui";
 import { useSession } from "@/lib/auth-client";
 import { useStoreEmployerOnboardingStep } from "@/services/onboarding/employer-onboarding";
@@ -33,6 +34,7 @@ export default function EmployerReviewPage() {
     (state) => state.saveStepData,
   );
   const saveStepMutation = useStoreEmployerOnboardingStep();
+  const isStepSaving = saveStepMutation.isPending;
 
   const methods = useForm<EmployerOnboardingValues>({
     defaultValues: savedData ?? employerOnboardingDefaultValues,
@@ -413,10 +415,20 @@ export default function EmployerReviewPage() {
             <button
               type="button"
               onClick={handleSubmit}
+              disabled={isStepSaving}
               className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 sm:w-auto"
             >
-              Submit for Verification
-              <MaterialSymbol icon="send" className="text-[18px]" />
+              {isStepSaving ? (
+                <>
+                  <LoadingSpinner className="border-white/80" />
+                  <span>Submitting...</span>
+                </>
+              ) : (
+                <>
+                  Submit for Verification
+                  <MaterialSymbol icon="send" className="text-[18px]" />
+                </>
+              )}
             </button>
           </div>
         </section>

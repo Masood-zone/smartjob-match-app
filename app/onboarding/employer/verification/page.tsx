@@ -12,6 +12,7 @@ import { OnboardingFrame } from "@/components/sections/onboarding/employer/emplo
 import {
   AsideCard,
   AvatarBadge,
+  LoadingSpinner,
   StepHeader,
 } from "@/components/sections/onboarding/employer/employer-ui";
 import { useSession } from "@/lib/auth-client";
@@ -37,6 +38,7 @@ export default function EmployerVerificationPage() {
     (state) => state.saveStepData,
   );
   const saveStepMutation = useStoreEmployerOnboardingStep();
+  const isStepSaving = saveStepMutation.isPending;
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadedDocument, setUploadedDocument] =
@@ -328,11 +330,20 @@ export default function EmployerVerificationPage() {
             <button
               type="button"
               onClick={handleContinue}
-              disabled={!documentReady}
+              disabled={!documentReady || isStepSaving}
               className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Continue to Team Setup
-              <span aria-hidden="true">→</span>
+              {isStepSaving ? (
+                <>
+                  <LoadingSpinner className="border-white/80" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  Continue to Team Setup
+                  <span aria-hidden="true">→</span>
+                </>
+              )}
             </button>
           </div>
         </div>
