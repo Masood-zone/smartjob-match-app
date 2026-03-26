@@ -105,7 +105,7 @@ export function HeroSection() {
 
             {role === "ADMIN" ? (
               <Link
-                href="/dashboard"
+                href="/admin/dashboard"
                 className="cursor-pointer inline-flex h-auto items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-base font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
               >
                 System Dashboard

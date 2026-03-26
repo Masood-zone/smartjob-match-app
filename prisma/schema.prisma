@@ -34,6 +34,12 @@ enum OnboardingStatus {
   COMPLETED
 }
 
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id        String   @id @default(uuid())
   name      String
@@ -124,6 +130,7 @@ model JobSeekerOnboarding {
   currentStep       Int              @default(0)
   currentStepKey    String           @default("identity")
   status            OnboardingStatus @default(IN_PROGRESS)
+  verificationStatus VerificationStatus @default(PENDING)
   draftData         Json?
   identityData      Json?
   experienceData    Json?
@@ -146,6 +153,7 @@ model EmployerOnboarding {
   currentStep       Int              @default(0)
   currentStepKey    String           @default("welcome")
   status            OnboardingStatus @default(IN_PROGRESS)
+  verificationStatus VerificationStatus @default(PENDING)
   draftData         Json?
   basicInfoData     Json?
   verificationData  Json?
@@ -229,4 +237,20 @@ model MediaAsset {
 
   @@index([createdById])
   @@index([provider])
+}
+
+model AlgorithmConfig {
+  id                      String   @id @default(uuid())
+  qualificationWeight      Int
+  skillsWeight             Int
+  experienceWeight         Int
+  preferenceWeight         Int
+  strictQualification      Boolean  @default(true)
+  allowOverqualified       Boolean  @default(true)
+  allowUnderqualified      Boolean  @default(false)
+  minimumSkillMatchPercent Int      @default(40)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@map("algorithm_config")
 }

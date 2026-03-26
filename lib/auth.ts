@@ -31,3 +31,7 @@ export const auth = betterAuth({
     }),
   ],
 });
+
+export const isAdmin = (user: { role?: string | null } | null | undefined) => {
+  return user?.role?.toUpperCase() === "ADMIN";
+};
