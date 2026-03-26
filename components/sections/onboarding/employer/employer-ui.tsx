@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRef } from "react";
 import type { ReactNode } from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
@@ -251,23 +252,56 @@ export function TextAreaField({
   placeholder,
   error,
   registration,
+  autoResize = false,
 }: {
   label: string;
   placeholder?: string;
   error?: string;
   registration: UseFormRegisterReturn;
+  autoResize?: boolean;
 }) {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const resizeTextarea = () => {
+    if (!textareaRef.current) {
+      return;
+    }
+
+    textareaRef.current.style.height = "auto";
+    textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+  };
+
   return (
     <div className="space-y-2">
       <label className="block text-sm font-semibold text-on-surface-variant">
         {label}
       </label>
-      <textarea
-        placeholder={placeholder}
-        rows={4}
-        {...registration}
-        className="w-full rounded-lg border border-outline-variant bg-surface px-4 py-3 text-on-surface outline-none transition-all placeholder:text-stone-300 focus:border-primary focus:ring-2 focus:ring-primary/20"
-      />
+      {(() => {
+        const { ref: registrationRef, ...inputRegistration } = registration;
+
+        return (
+          <textarea
+            placeholder={placeholder}
+            rows={4}
+            {...inputRegistration}
+            ref={(element) => {
+              textareaRef.current = element;
+
+              if (typeof registrationRef === "function") {
+                registrationRef(element);
+              } else if (registrationRef) {
+                registrationRef.current = element;
+              }
+
+              if (element && autoResize) {
+                resizeTextarea();
+              }
+            }}
+            onInput={autoResize ? resizeTextarea : undefined}
+            className="w-full rounded-lg border border-outline-variant bg-surface px-4 py-3 text-on-surface outline-none transition-all placeholder:text-stone-300 focus:border-primary focus:ring-2 focus:ring-primary/20"
+          />
+        );
+      })()}
       {error ? <p className="text-xs text-destructive">{error}</p> : null}
     </div>
   );
@@ -278,26 +312,28 @@ export function ProgressSidebar({
 }: {
   currentStepKey: string;
 }) {
+  const currentStepIndex = Math.max(
+    employerFlowSteps.findIndex((step) => step.key === currentStepKey),
+    0,
+  );
+
   return (
-    <aside className="hidden rounded-[1.75rem] border border-[#d8d0c8]/60 bg-[#faf5ee] p-5 shadow-[0_2px_16px_rgba(58,48,42,0.04)] lg:block">
+    <aside className="hidden rounded-[1.75rem] border border-[#d8d0c8]/60 bg-[#faf5ee] p-5 shadow-[0_2px_16px_rgba(58,48,42,0.04)] lg:sticky lg:top-24 lg:self-start lg:block">
       <div className="space-y-2">
         <p className="text-2xl font-serif text-on-surface">Onboarding</p>
         <p className="text-xs font-medium uppercase tracking-[0.28em] text-stone-400">
-          Step{" "}
-          {Math.max(
-            employerFlowSteps.findIndex((step) => step.key === currentStepKey),
-            0,
-          ) + 1}{" "}
-          of 5
+          Step {currentStepIndex + 1} of 5
         </p>
       </div>
 
       <nav className="mt-6 flex flex-col gap-2">
         {employerFlowSteps.slice(1, 5).map((step, index) => {
+          const stepFullIndex = employerFlowSteps.findIndex(
+            (item) => item.key === step.key,
+          );
           const isActive = step.key === currentStepKey;
-          const isClickable =
-            employerFlowSteps.findIndex((item) => item.key === step.key) <=
-            employerFlowSteps.findIndex((item) => item.key === currentStepKey);
+          const isCompleted = stepFullIndex < currentStepIndex;
+          const isClickable = stepFullIndex <= currentStepIndex;
 
           return (
             <Link
@@ -315,12 +351,18 @@ export function ProgressSidebar({
               <span
                 className={cn(
                   "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold",
-                  isActive
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-outline-variant bg-surface text-stone-500",
+                  isCompleted
+                    ? "border-primary bg-primary/10 text-primary"
+                    : isActive
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-outline-variant bg-surface text-stone-500",
                 )}
               >
-                {String(index + 1).padStart(2, "0")}
+                {isCompleted ? (
+                  <MaterialSymbol icon="check" className="text-[16px]" />
+                ) : (
+                  String(index + 1).padStart(2, "0")
+                )}
               </span>
               <span className="min-w-0">
                 <span className="block text-sm font-semibold">

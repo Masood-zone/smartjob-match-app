@@ -77,10 +77,12 @@ export function OnboardingFrame({
   currentStepKey,
   children,
   aside,
+  layout = "default",
 }: {
   currentStepKey: string;
   children: ReactNode;
   aside?: ReactNode;
+  layout?: "default" | "wide";
 }) {
   const { data: session } = useSession();
   const user = session?.user as SessionUser | undefined;
@@ -134,7 +136,13 @@ export function OnboardingFrame({
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[240px_minmax(0,1fr)_320px] lg:px-8 lg:py-10">
+      <div
+        className={
+          layout === "wide"
+            ? "mx-auto grid max-w-336 gap-6 px-4 py-6 lg:grid-cols-[220px_minmax(0,1.12fr)_300px] lg:px-8 lg:py-10"
+            : "mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[240px_minmax(0,1fr)_320px] lg:px-8 lg:py-10"
+        }
+      >
         <ProgressSidebar currentStepKey={currentStepKey} />
 
         <section className="space-y-6">

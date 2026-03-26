@@ -1,18 +1,14 @@
 "use client";
-
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { MarketingFrame } from "@/components/sections/onboarding/employer/employer-page-frame";
-import {
-  AvatarBadge,
-  FeatureCard,
-} from "@/components/sections/onboarding/employer/employer-ui";
+import { FeatureCard } from "@/components/sections/onboarding/employer/employer-ui";
 import { useSession } from "@/lib/auth-client";
 
 export default function EmployerWelcomePage() {
   const router = useRouter();
-  const { data: session, isPending } = useSession();
+  const { data: session } = useSession();
   const user = session?.user;
 
   return (
@@ -60,46 +56,18 @@ export default function EmployerWelcomePage() {
               >
                 Start Employer Registration
               </button>
-              <Link
-                href="/login"
-                className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-outline-variant px-8 py-4 text-sm font-semibold text-on-surface transition-colors hover:bg-surface-container-low"
-              >
-                Already registered? Sign in
-              </Link>
+              {!user && (
+                <Link
+                  href="/login"
+                  className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-outline-variant px-8 py-4 text-sm font-semibold text-on-surface transition-colors hover:bg-surface-container-low"
+                >
+                  Already registered? Sign in
+                </Link>
+              )}
             </div>
           </section>
 
           <section className="space-y-4">
-            <div className="rounded-[1.75rem] border border-outline-variant bg-surface-container-lowest p-5 shadow-[0_18px_50px_rgba(58,48,42,0.05)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary">
-                Session Preview
-              </p>
-              <div className="mt-4 flex items-center gap-3 rounded-[1.25rem] border border-outline-variant bg-surface p-4">
-                <AvatarBadge
-                  user={
-                    user
-                      ? {
-                          name: user.name,
-                          email: user.email,
-                          image: user.image,
-                        }
-                      : undefined
-                  }
-                  sessionPending={isPending}
-                />
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-on-surface">
-                    {user?.name || "Signed in user"}
-                  </p>
-                  <p className="truncate text-xs text-on-surface-variant">
-                    {isPending
-                      ? "Loading account..."
-                      : user?.email || "No email available"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
             <div className="rounded-[1.75rem] border border-outline-variant bg-primary/5 p-5 shadow-[0_18px_50px_rgba(58,48,42,0.05)]">
               <div className="relative h-64 overflow-hidden rounded-[1.5rem] bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.72),transparent_28%),linear-gradient(135deg,#f2d7c1_0%,#e9c09c_36%,#b87b4a_100%)]">
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgba(58,48,42,0.28))]" />
@@ -108,7 +76,7 @@ export default function EmployerWelcomePage() {
                     “The future of work begins with the right foundations.”
                   </p>
                   <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.28em] text-on-surface-variant">
-                    Verification Status: Pending
+                    Verification
                   </p>
                 </div>
               </div>
