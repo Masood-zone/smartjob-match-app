@@ -1,4 +1,6 @@
 import Link from "next/link";
+
+import { JobSeekerAccessButton } from "./job-seeker-access-button";
 export function CtaSection() {
   return (
     <section id="cta" className="bg-primary px-6 py-24 text-on-primary">
@@ -15,12 +17,9 @@ export function CtaSection() {
         </p>
 
         <div className="flex flex-col gap-4 sm:flex-row">
-          <Link
-            href="/onboarding/job-seeker"
-            className="cursor-pointer inline-flex h-auto items-center justify-center rounded-lg bg-surface px-10 py-4 text-base font-bold text-primary transition-colors hover:bg-surface-dim"
-          >
+          <JobSeekerAccessButton className="cursor-pointer inline-flex h-auto items-center justify-center rounded-lg bg-surface px-10 py-4 text-base font-bold text-primary transition-colors hover:bg-surface-dim">
             Start Job Seeker Onboarding
-          </Link>
+          </JobSeekerAccessButton>
           <Link
             href="/onboarding/employer"
             className="cursor-pointer inline-flex h-auto items-center justify-center rounded-lg border border-on-primary px-10 py-4 text-base font-bold text-on-primary transition-colors hover:bg-on-primary/10"

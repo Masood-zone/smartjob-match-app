@@ -2,6 +2,8 @@ import Link from "next/link";
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
 import Image from "next/image";
 
+import { JobSeekerAccessButton } from "./job-seeker-access-button";
+
 const trustedFaces = [
   "https://lh3.googleusercontent.com/aida-public/AB6AXuC52DoNfvod0oxeIlyTaFqxnpSaOFEa5vuCEy2CtOGY5Sf7tcuvv5eR6DB0KQFA81skTlMJk_e7xvph6t697hNyB-4zeJjJgyJoCI0zmh814c6HtlY2cz_eP9D7Gpz5vYdA8kGr7NWduSesO4MEb-vUuKRdpIvBOM0xBiYPYb1SXDhA7_hPOvHXijB3PUCBmewQixXc1wfszkQav1oe1HrUEfKXv7sKzJTHJQ9R998xBImNsrBE5i02HW4c0EpcClLNVd5ml_yslYM",
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAKtipXnKuOEIMAcsefw7BmUiSvAa9uIcn_vRXTQ9bOUdUd4KgWzekeQD0J-Ilo1MatY21RHQ3yaXRfhp63lXh_lPksJGy2XOBkAoVrM6-67pJ74OxL3TyCqYdzFtxag65s115o-tWfV1Ikq9EY2xS90Q1NrZERgGXrRl6jVNvd75OBgyJmkaGI3b-Bf7mNh7cgokzF1hO1xEpXxCIBsqnISJ5BNFWLvsP1IaQxBVfbZ0An-MfqitZVsqYjQKGErBLDx79AhFNNC70",
@@ -36,13 +38,10 @@ export function HeroSection() {
           </div>
 
           <div className="flex flex-col gap-4 sm:flex-row">
-            <Link
-              href="/onboarding/job-seeker"
-              className="cursor-pointer inline-flex h-auto items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-base font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
-            >
+            <JobSeekerAccessButton className="cursor-pointer inline-flex h-auto items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-base font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90">
               Get Started as Job Seeker
               <MaterialSymbol icon="arrow_forward" className="text-[18px]" />
-            </Link>
+            </JobSeekerAccessButton>
             <Link
               href="/onboarding/employer"
               className="cursor-pointer inline-flex h-auto items-center justify-center rounded-lg border border-primary px-8 py-4 text-base font-bold text-primary transition-colors hover:bg-primary/5"

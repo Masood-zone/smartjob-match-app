@@ -1,11 +1,20 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuGroup,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useSession } from "@/lib/auth-client";
 import { userLogout } from "@/services/auth/user-auth";
 
@@ -13,6 +22,7 @@ type SessionUser = {
   name?: string | null;
   image?: string | null;
   role?: "USER" | "JOB_SEEKER" | "EMPLOYER" | "ADMIN" | string;
+  email?: string | null;
 };
 
 type SessionAvatarBadgeProps = {
@@ -43,6 +53,18 @@ function getRoleLabel(role?: SessionUser["role"]) {
   }
 
   return "User";
+}
+
+function getDashboardHref(role?: SessionUser["role"]) {
+  if (role === "EMPLOYER") {
+    return "/onboarding/employer/dashboard";
+  }
+
+  if (role === "JOB_SEEKER") {
+    return "/onboarding/job-seeker/dashboard";
+  }
+
+  return "/onboarding";
 }
 
 export function SessionAvatarBadge({ onNavigate }: SessionAvatarBadgeProps) {
@@ -120,25 +142,21 @@ export function SessionAvatarBadge({ onNavigate }: SessionAvatarBadgeProps) {
   }
 
   const userInitials = getUserInitials(user.name);
-  const avatarContent = user.image ? (
-    <Image
-      src={user.image}
-      alt={user.name ? `${user.name} avatar` : "User avatar"}
-      width={40}
-      height={40}
-      className="h-full w-full rounded-full object-cover"
-    />
-  ) : (
-    <span className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-      {userInitials}
-    </span>
-  );
+  const dashboardHref = getDashboardHref(user.role);
 
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex items-center gap-3 rounded-full border border-[#d8d0c8]/70 bg-surface/80 px-2 py-1.5 pr-4 shadow-sm">
+    <DropdownMenu>
+      <DropdownMenuTrigger className="flex items-center gap-3 rounded-full border border-[#d8d0c8]/70 bg-surface/80 px-2 py-1.5 pr-4 shadow-sm outline-none transition-colors hover:border-primary/40">
         <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary/10 ring-2 ring-primary/10">
-          {avatarContent}
+          <Avatar size="default" className="h-10 w-10 border-0 bg-transparent">
+            <AvatarImage
+              src={user.image || undefined}
+              alt={user.name ? `${user.name} avatar` : "User avatar"}
+            />
+            <AvatarFallback className="bg-transparent text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+              {userInitials}
+            </AvatarFallback>
+          </Avatar>
           {isRefetching ? (
             <span className="absolute inline-flex h-10 w-10 animate-pulse rounded-full bg-primary/5" />
           ) : null}
@@ -151,15 +169,47 @@ export function SessionAvatarBadge({ onNavigate }: SessionAvatarBadgeProps) {
             {getRoleLabel(user.role)}
           </p>
         </div>
-      </div>
-      <Button
-        type="button"
-        variant="ghost"
-        className="cursor-pointer rounded-lg px-3 py-2 text-sm text-stone-600 transition-colors hover:text-primary"
-        onClick={handleLogout}
-      >
-        Logout
-      </Button>
-    </div>
+        <MaterialSymbol
+          icon="keyboard_arrow_down"
+          className="text-[18px] text-on-surface-variant"
+        />
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent className="w-72">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-on-surface">
+                {user.name || "Signed in"}
+              </p>
+              <p className="text-xs text-on-surface-variant">
+                {user.email || "account@qualify.app"}
+              </p>
+            </div>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => router.push(dashboardHref)}>
+          <MaterialSymbol icon="dashboard" className="text-[16px]" />
+          Dashboard
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push("/onboarding")}>
+          <MaterialSymbol icon="route" className="text-[16px]" />
+          Onboarding hub
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push("/resources")}>
+          <MaterialSymbol icon="help" className="text-[16px]" />
+          Help center
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => void handleLogout()}
+          variant="destructive"
+        >
+          <MaterialSymbol icon="logout" className="text-[16px]" />
+          Logout
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

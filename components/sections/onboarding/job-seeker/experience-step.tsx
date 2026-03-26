@@ -1,10 +1,10 @@
 "use client";
 
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 import { toast } from "sonner";
 
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
-import { saveJobSeekerOnboardingStep } from "@/services/onboarding/job-seeker-onboarding";
+import { useStoreJobSeekerOnboardingStep } from "@/services/onboarding/job-seeker-onboarding";
 import { useJobSeekerOnboardingStore } from "@/stores/job-seeker-onboarding-store";
 
 import { DateField } from "./date-field";
@@ -18,27 +18,35 @@ export function ExperienceStep({
   onBack: () => void;
   onContinue: () => void;
 }) {
-  const { control, handleSubmit, register, getValues, setValue } =
-    useFormContext<JobSeekerOnboardingValues>();
+  const {
+    control,
+    handleSubmit,
+    register,
+    getValues,
+    setValue,
+    getFieldState,
+    formState,
+  } = useFormContext<JobSeekerOnboardingValues>();
   const { saveStepData } = useJobSeekerOnboardingStore();
+  const saveStepMutation = useStoreJobSeekerOnboardingStep();
   const { fields, append, remove } = useFieldArray({
     control,
     name: "experience",
   });
 
-  const onSubmit = handleSubmit((values) => {
+  const onSubmit = handleSubmit(async (values) => {
     saveStepData(values);
-    return saveJobSeekerOnboardingStep({
-      stepKey: "experience",
-      values,
-    })
-      .then(() => {
-        toast.success("Experience step saved");
-        onContinue();
-      })
-      .catch((error: Error) => {
-        toast.error(error.message || "Unable to save experience step");
+    try {
+      await saveStepMutation.mutateAsync({
+        stepKey: "experience",
+        values,
       });
+
+      toast.success("Experience step saved");
+      onContinue();
+    } catch {
+      return;
+    }
   });
 
   return (
@@ -78,21 +86,27 @@ export function ExperienceStep({
               name={`experience.${index}.jobTitle` as const}
               label="Job title"
               placeholder="e.g. Senior Brand Designer"
+              rules={{ required: "Job title is required" }}
             />
             <Field
               name={`experience.${index}.companyName` as const}
               label="Company name"
               placeholder="e.g. Sahara Studio"
+              rules={{ required: "Company name is required" }}
             />
-            <DateField
-              label="Start date"
-              selected={getValues(`experience.${index}.startDate`)}
-              onSelect={(date) =>
-                setValue(`experience.${index}.startDate`, date, {
-                  shouldDirty: true,
-                })
-              }
-              placeholder="Pick a start date"
+            <Controller
+              control={control}
+              name={`experience.${index}.startDate` as const}
+              rules={{ required: "Start date is required" }}
+              render={({ field, fieldState }) => (
+                <DateField
+                  label="Start date"
+                  selected={field.value}
+                  onSelect={(date) => field.onChange(date)}
+                  placeholder="Pick a start date"
+                  error={fieldState.error?.message}
+                />
+              )}
             />
 
             <div className="space-y-3">
@@ -129,16 +143,25 @@ export function ExperienceStep({
                   Present
                 </div>
               ) : (
-                <DateField
-                  label=""
-                  selected={getValues(`experience.${index}.endDate`)}
-                  onSelect={(date) =>
-                    setValue(`experience.${index}.endDate`, date, {
-                      shouldDirty: true,
-                    })
-                  }
-                  placeholder="Pick an end date"
-                  hideLabel
+                <Controller
+                  control={control}
+                  name={`experience.${index}.endDate` as const}
+                  rules={{
+                    validate: (value) =>
+                      Boolean(value) ||
+                      getValues(`experience.${index}.isCurrentRole`) ||
+                      "End date is required for past roles",
+                  }}
+                  render={({ field, fieldState }) => (
+                    <DateField
+                      label=""
+                      selected={field.value}
+                      onSelect={(date) => field.onChange(date)}
+                      placeholder="Pick an end date"
+                      hideLabel
+                      error={fieldState.error?.message}
+                    />
+                  )}
                 />
               )}
             </div>
@@ -151,8 +174,23 @@ export function ExperienceStep({
                 rows={4}
                 placeholder="Describe the impact you made in this role..."
                 className="w-full rounded-lg border border-outline-variant bg-surface px-4 py-3 text-on-surface outline-none transition-all placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/15"
-                {...register(`experience.${index}.description` as const)}
+                {...register(`experience.${index}.description` as const, {
+                  required: "Describe the work you actually did in this role",
+                })}
               />
+              {getFieldState(
+                `experience.${index}.description` as const,
+                formState,
+              ).error?.message ? (
+                <p className="text-xs text-destructive">
+                  {
+                    getFieldState(
+                      `experience.${index}.description` as const,
+                      formState,
+                    ).error?.message
+                  }
+                </p>
+              ) : null}
             </div>
           </div>
         </article>
@@ -170,7 +208,7 @@ export function ExperienceStep({
             description: "",
           })
         }
-        className="flex w-full items-center justify-center gap-3 rounded-[1.25rem] border-2 border-dashed border-outline-variant px-5 py-4 text-sm font-semibold text-on-surface-variant transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+        className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-[1.25rem] border-2 border-dashed border-outline-variant px-5 py-4 text-sm font-semibold text-on-surface-variant transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
       >
         <MaterialSymbol icon="add_circle" className="text-[20px]" />
         Add another experience
@@ -188,9 +226,10 @@ export function ExperienceStep({
 
         <button
           type="submit"
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground shadow-[0_16px_34px_rgba(194,101,42,0.22)] transition-all hover:bg-primary/90"
+          disabled={saveStepMutation.isPending}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground shadow-[0_16px_34px_rgba(194,101,42,0.22)] transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          Continue
+          {saveStepMutation.isPending ? "Saving..." : "Continue"}
           <MaterialSymbol icon="arrow_forward" className="text-[18px]" />
         </button>
       </div>

@@ -3,9 +3,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 const stepRecordFields = {
-  identity: "identityData",
-  experience: "experienceData",
-  qualifications: "qualificationData",
+  "basic-info": "basicInfoData",
+  verification: "verificationData",
+  "team-setup": "teamSetupData",
   review: "reviewData",
 } as const;
 
@@ -13,14 +13,11 @@ type OnboardingPayload = {
   email?: string;
   currentStep?: number;
   stepKey?: keyof typeof stepRecordFields;
-  values?: {
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    qualification?: string;
-    skills?: string[];
+  values?: Record<string, unknown> & {
+    companyName?: string;
+    companyEmail?: string;
     accepted?: boolean;
-  } & Record<string, unknown>;
+  };
 };
 
 export async function POST(request: Request) {
@@ -68,23 +65,23 @@ export async function POST(request: Request) {
     const result = await prisma.$transaction(async (tx) => {
       const onboardingTx = tx as typeof tx & {
         user: any;
-        jobSeekerOnboarding: any;
-        jobSeeker: any;
+        employerOnboarding: any;
+        employer: any;
       };
 
-      const onboarding = await onboardingTx.jobSeekerOnboarding.upsert({
+      const onboarding = await onboardingTx.employerOnboarding.upsert({
         where: { userId: user.id },
         create: {
           userId: user.id,
           currentStep: onboardingData.currentStep,
           currentStepKey: onboardingData.currentStepKey,
           draftData: onboardingData.draftData,
-          identityData:
-            stepKey === "identity" ? onboardingData.draftData : undefined,
-          experienceData:
-            stepKey === "experience" ? onboardingData.draftData : undefined,
-          qualificationData:
-            stepKey === "qualifications" ? onboardingData.draftData : undefined,
+          basicInfoData:
+            stepKey === "basic-info" ? onboardingData.draftData : undefined,
+          verificationData:
+            stepKey === "verification" ? onboardingData.draftData : undefined,
+          teamSetupData:
+            stepKey === "team-setup" ? onboardingData.draftData : undefined,
           reviewData:
             stepKey === "review" ? onboardingData.draftData : undefined,
           status: onboardingData.status,
@@ -94,12 +91,12 @@ export async function POST(request: Request) {
           currentStep: onboardingData.currentStep,
           currentStepKey: onboardingData.currentStepKey,
           draftData: onboardingData.draftData,
-          identityData:
-            stepKey === "identity" ? onboardingData.draftData : undefined,
-          experienceData:
-            stepKey === "experience" ? onboardingData.draftData : undefined,
-          qualificationData:
-            stepKey === "qualifications" ? onboardingData.draftData : undefined,
+          basicInfoData:
+            stepKey === "basic-info" ? onboardingData.draftData : undefined,
+          verificationData:
+            stepKey === "verification" ? onboardingData.draftData : undefined,
+          teamSetupData:
+            stepKey === "team-setup" ? onboardingData.draftData : undefined,
           reviewData:
             stepKey === "review" ? onboardingData.draftData : undefined,
           status: onboardingData.status,
@@ -108,35 +105,33 @@ export async function POST(request: Request) {
       });
 
       if (stepKey === "review" && values.accepted) {
-        const fullName = [values.firstName, values.lastName]
-          .filter(Boolean)
-          .join(" ")
-          .trim();
+        const companyName =
+          typeof values.companyName === "string"
+            ? values.companyName.trim()
+            : "";
 
-        if (fullName) {
+        if (companyName) {
           await onboardingTx.user.update({
             where: { id: user.id },
-            data: { name: fullName, role: "JOB_SEEKER" },
+            data: { role: "EMPLOYER" },
+          });
+
+          await onboardingTx.employer.upsert({
+            where: { userId: user.id },
+            create: {
+              userId: user.id,
+              companyName,
+              role: "EMPLOYER",
+            },
+            update: {
+              companyName,
+              role: "EMPLOYER",
+            },
           });
         } else {
           await onboardingTx.user.update({
             where: { id: user.id },
-            data: { role: "JOB_SEEKER" },
-          });
-        }
-
-        if (values.qualification && Array.isArray(values.skills)) {
-          await onboardingTx.jobSeeker.upsert({
-            where: { userId: user.id },
-            create: {
-              userId: user.id,
-              qualification: values.qualification as never,
-              skills: values.skills,
-            },
-            update: {
-              qualification: values.qualification as never,
-              skills: values.skills,
-            },
+            data: { role: "EMPLOYER" },
           });
         }
       }

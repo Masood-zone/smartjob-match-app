@@ -14,10 +14,12 @@ export function YearField({
   label,
   year,
   onSelectYear,
+  error,
 }: {
   label: string;
   year?: number;
   onSelectYear: (year: number) => void;
+  error?: string;
 }) {
   const currentYear = new Date().getFullYear();
   const years = useMemo(
@@ -50,6 +52,7 @@ export function YearField({
           ))}
         </SelectContent>
       </Select>
+      {error ? <p className="text-xs text-destructive">{error}</p> : null}
     </div>
   );
 }

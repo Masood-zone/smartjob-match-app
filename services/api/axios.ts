@@ -12,8 +12,15 @@ export const api = axios.create({
 
 export function getAxiosErrorMessage(error: unknown) {
   if (axios.isAxiosError(error)) {
+    const responseData = error.response?.data as
+      | { error?: string; message?: string }
+      | undefined;
+
     return (
-      error.response?.data?.message || error.message || "Something went wrong"
+      responseData?.message ||
+      responseData?.error ||
+      error.message ||
+      "Something went wrong"
     );
   }
 

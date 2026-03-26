@@ -5,6 +5,27 @@ import { allSkills, skillSectors } from "@/utils/platform-data";
 
 import { FilterChip } from "./filter-chip";
 
+const sectorIcons: Record<string, string> = {
+  technology: "code",
+  "data-ai": "database",
+  "design-creative": "palette",
+  "marketing-sales": "campaign",
+  "finance-accounting": "account_balance",
+  healthcare: "medical_services",
+  "education-training": "school",
+  "engineering-construction": "engineering",
+  "operations-supply-chain": "warehouse",
+  "hospitality-tourism": "room_service",
+  "agriculture-environment": "eco",
+  "public-sector": "groups",
+  "governance-law": "gavel",
+  "administration-support": "support_agent",
+};
+
+function getSectorIcon(sectorId: string) {
+  return sectorIcons[sectorId] ?? "category";
+}
+
 export function SkillExplorer({
   title,
   selectedSkills,
@@ -31,6 +52,10 @@ export function SkillExplorer({
   compact?: boolean;
 }) {
   const totalSkills = allSkills.length;
+  const displayedSectors =
+    activeSector === "all"
+      ? visibleSectors
+      : visibleSectors.filter((sector) => sector.id === activeSector);
 
   return (
     <section className="space-y-4 rounded-[1.5rem] border border-outline-variant bg-surface-container-low p-4 lg:p-5">
@@ -64,7 +89,7 @@ export function SkillExplorer({
         <button
           type="button"
           onClick={() => onSkillQueryChange("")}
-          className="rounded-lg border border-outline-variant bg-surface px-4 py-3 text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container-low"
+          className="cursor-pointer rounded-lg border border-outline-variant bg-surface px-4 py-3 text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container-low"
         >
           Clear search
         </button>
@@ -97,7 +122,7 @@ export function SkillExplorer({
                 key={skill}
                 type="button"
                 onClick={() => onToggleSkill(skill)}
-                className="inline-flex items-center gap-2 rounded-full bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90"
               >
                 {skill}
                 <MaterialSymbol icon="close" className="text-[14px]" />
@@ -112,19 +137,27 @@ export function SkillExplorer({
           compact ? "space-y-4" : "max-h-112 space-y-4 overflow-y-auto pr-1"
         }
       >
-        {visibleSectors.map((sector) => (
+        {displayedSectors.map((sector) => (
           <article
             key={sector.id}
             className={`rounded-[1.25rem] border bg-surface p-4 transition-all ${activeSector === sector.id ? "border-primary shadow-[0_10px_24px_rgba(194,101,42,0.08)]" : "border-outline-variant"}`}
           >
             <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h3 className="text-base font-semibold text-on-surface">
-                  {sector.label}
-                </h3>
-                <p className="text-xs text-on-surface-variant">
-                  {sector.description}
-                </p>
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-container-low text-primary">
+                  <MaterialSymbol
+                    icon={getSectorIcon(sector.id)}
+                    className="text-[20px]"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-on-surface">
+                    {sector.label}
+                  </h3>
+                  <p className="text-xs text-on-surface-variant">
+                    {sector.description}
+                  </p>
+                </div>
               </div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-primary">
                 {sector.skills.length} skill
@@ -141,7 +174,7 @@ export function SkillExplorer({
                     key={skill}
                     type="button"
                     onClick={() => onToggleSkill(skill)}
-                    className={`rounded-full border px-3.5 py-2 text-xs font-medium transition-all ${isSelected ? "border-primary bg-primary text-on-primary" : "border-outline-variant bg-surface-container-low text-on-surface hover:border-primary hover:text-primary"}`}
+                    className={`cursor-pointer rounded-full border px-3.5 py-2 text-xs font-medium transition-all ${isSelected ? "border-primary bg-primary text-on-primary" : "border-outline-variant bg-surface-container-low text-on-surface hover:border-primary hover:text-primary"}`}
                   >
                     {skill}
                   </button>
@@ -155,7 +188,7 @@ export function SkillExplorer({
                   key={`${sector.id}-${skill}-quick`}
                   type="button"
                   onClick={() => onQuickAddSkill(skill)}
-                  className="text-[10px] font-semibold uppercase tracking-[0.24em] text-primary transition-colors hover:text-primary/80"
+                  className="cursor-pointer text-[10px] font-semibold uppercase tracking-[0.24em] text-primary transition-colors hover:text-primary/80"
                 >
                   Add {skill}
                 </button>
@@ -164,7 +197,7 @@ export function SkillExplorer({
           </article>
         ))}
 
-        {visibleSectors.length === 0 ? (
+        {displayedSectors.length === 0 ? (
           <div className="rounded-[1.25rem] border border-dashed border-outline-variant bg-surface px-4 py-8 text-center text-sm text-on-surface-variant">
             No skills matched your search. Try a broader sector or clear the
             filter.

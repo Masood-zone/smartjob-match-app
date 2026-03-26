@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
-import { saveJobSeekerOnboardingStep } from "@/services/onboarding/job-seeker-onboarding";
+import { useStoreJobSeekerOnboardingStep } from "@/services/onboarding/job-seeker-onboarding";
 import { useJobSeekerOnboardingStore } from "@/stores/job-seeker-onboarding-store";
 import {
   Select,
@@ -29,9 +29,10 @@ export function QualificationsStep({
   onBack: () => void;
   onContinue: () => void;
 }) {
-  const { control, handleSubmit, setValue } =
+  const { control, handleSubmit, setValue, register, formState } =
     useFormContext<JobSeekerOnboardingValues>();
   const { saveStepData } = useJobSeekerOnboardingStore();
+  const saveStepMutation = useStoreJobSeekerOnboardingStep();
   const selectedQualificationValue = useWatch({
     control,
     name: "qualification",
@@ -55,23 +56,30 @@ export function QualificationsStep({
     ? institutionName
     : "custom";
 
-  const onSubmit = handleSubmit((values) => {
+  const onSubmit = handleSubmit(async (values) => {
     saveStepData(values);
-    return saveJobSeekerOnboardingStep({
-      stepKey: "qualifications",
-      values,
-    })
-      .then(() => {
-        toast.success("Qualification step saved");
-        onContinue();
-      })
-      .catch((error: Error) => {
-        toast.error(error.message || "Unable to save qualification step");
+    try {
+      await saveStepMutation.mutateAsync({
+        stepKey: "qualifications",
+        values,
       });
+
+      toast.success("Qualification step saved");
+      onContinue();
+    } catch {
+      return;
+    }
   });
 
   return (
     <form className="space-y-6" onSubmit={onSubmit}>
+      <input
+        type="hidden"
+        {...register("gradeLevel", {
+          required: "Choose a grade level",
+        })}
+      />
+
       <div className="grid gap-5 md:grid-cols-2">
         <div className="space-y-2">
           <label className="block text-[10px] font-bold uppercase tracking-[0.28em] text-on-surface-variant">
@@ -80,6 +88,7 @@ export function QualificationsStep({
           <Controller
             control={control}
             name="qualification"
+            rules={{ required: "Select your highest qualification" }}
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger>
@@ -95,6 +104,11 @@ export function QualificationsStep({
               </Select>
             )}
           />
+          {formState.errors.qualification?.message ? (
+            <p className="text-xs text-destructive">
+              {formState.errors.qualification.message}
+            </p>
+          ) : null}
         </div>
 
         <div className="space-y-2">
@@ -129,18 +143,26 @@ export function QualificationsStep({
               name="institutionName"
               label="Custom institution"
               placeholder="Type your institution"
+              rules={{ required: "Type your institution name" }}
             />
+          ) : null}
+          {formState.errors.institutionName?.message ? (
+            <p className="text-xs text-destructive">
+              {formState.errors.institutionName.message}
+            </p>
           ) : null}
         </div>
 
         <Controller
           control={control}
           name="yearOfCompletion"
+          rules={{ required: "Select the year of completion" }}
           render={({ field }) => (
             <YearField
               label="Year of completion"
               year={field.value}
               onSelectYear={field.onChange}
+              error={formState.errors.yearOfCompletion?.message}
             />
           )}
         />
@@ -164,13 +186,18 @@ export function QualificationsStep({
                 onClick={() =>
                   setValue("gradeLevel", grade, { shouldDirty: true })
                 }
-                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${active ? "border-primary bg-primary text-on-primary" : "border-outline-variant bg-surface text-on-surface hover:border-primary hover:text-primary"}`}
+                className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${active ? "border-primary bg-primary text-on-primary" : "border-outline-variant bg-surface text-on-surface hover:border-primary hover:text-primary"}`}
               >
                 {grade}
               </button>
             );
           })}
         </div>
+        {formState.errors.gradeLevel?.message ? (
+          <p className="text-xs text-destructive">
+            {formState.errors.gradeLevel.message}
+          </p>
+        ) : null}
       </div>
 
       <div className="flex items-center justify-between pt-2">
@@ -185,9 +212,10 @@ export function QualificationsStep({
 
         <button
           type="submit"
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground shadow-[0_16px_34px_rgba(194,101,42,0.22)] transition-all hover:bg-primary/90"
+          disabled={saveStepMutation.isPending}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground shadow-[0_16px_34px_rgba(194,101,42,0.22)] transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          Continue
+          {saveStepMutation.isPending ? "Saving..." : "Continue"}
           <span className="text-[18px]">→</span>
         </button>
       </div>

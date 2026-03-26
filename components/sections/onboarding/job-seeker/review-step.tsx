@@ -4,32 +4,40 @@ import { Controller, useFormContext } from "react-hook-form";
 import { toast } from "sonner";
 
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
-import { saveJobSeekerOnboardingStep } from "@/services/onboarding/job-seeker-onboarding";
+import { useStoreJobSeekerOnboardingStep } from "@/services/onboarding/job-seeker-onboarding";
 import { useJobSeekerOnboardingStore } from "@/stores/job-seeker-onboarding-store";
 
 import { SummaryCard } from "./summary-card";
 import type { JobSeekerOnboardingValues } from "./job-seeker-onboarding-types";
 
-export function ReviewStep({ onBack }: { onBack: () => void }) {
-  const { handleSubmit, getValues, control } =
+export function ReviewStep({
+  onBack,
+  onComplete,
+}: {
+  onBack: () => void;
+  onComplete?: () => void;
+}) {
+  const { handleSubmit, getValues, control, formState } =
     useFormContext<JobSeekerOnboardingValues>();
   const { data, saveStepData } = useJobSeekerOnboardingStore();
+  const saveStepMutation = useStoreJobSeekerOnboardingStep();
 
-  const onSubmit = handleSubmit((values) => {
+  const onSubmit = handleSubmit(async (values) => {
     saveStepData(values);
-    return saveJobSeekerOnboardingStep({
-      stepKey: "review",
-      values,
-    })
-      .then(() => {
-        toast.success("Onboarding completed and saved");
-        console.log("Job Seeker Onboarding Payload", values);
-        console.log("Job Seeker Store Snapshot", data);
-        console.log("Job Seeker RHF Snapshot", getValues());
-      })
-      .catch((error: Error) => {
-        toast.error(error.message || "Unable to complete onboarding");
+    try {
+      await saveStepMutation.mutateAsync({
+        stepKey: "review",
+        values,
       });
+
+      toast.success("Onboarding completed and saved");
+      console.log("Job Seeker Onboarding Payload", values);
+      console.log("Job Seeker Store Snapshot", data);
+      console.log("Job Seeker RHF Snapshot", getValues());
+      onComplete?.();
+    } catch {
+      return;
+    }
   });
 
   return (
@@ -80,21 +88,33 @@ export function ReviewStep({ onBack }: { onBack: () => void }) {
       <Controller
         control={control}
         name="accepted"
+        rules={{
+          validate: (value) =>
+            value ||
+            "Confirm that the information is accurate before continuing",
+        }}
         render={({ field }) => (
-          <label className="flex items-start gap-3 rounded-[1.25rem] border border-outline-variant bg-surface-container-low p-4 text-sm text-on-surface-variant">
-            <input
-              type="checkbox"
-              checked={field.value}
-              onChange={(event) => field.onChange(event.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
-            />
-            <span>
-              I confirm that the information above is accurate and I am ready to
-              continue to the dashboard handoff.
-            </span>
-          </label>
+          <div className="space-y-2">
+            <label className="flex cursor-pointer items-start gap-3 rounded-[1.25rem] border border-outline-variant bg-surface-container-low p-4 text-sm text-on-surface-variant">
+              <input
+                type="checkbox"
+                checked={field.value}
+                onChange={(event) => field.onChange(event.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
+              />
+              <span>
+                I confirm that the information above is accurate and I am ready
+                to continue to the dashboard handoff.
+              </span>
+            </label>
+          </div>
         )}
       />
+      {formState.errors.accepted?.message ? (
+        <p className="text-xs text-destructive">
+          {formState.errors.accepted.message}
+        </p>
+      ) : null}
 
       <div className="flex items-center justify-between pt-2">
         <button
@@ -108,9 +128,10 @@ export function ReviewStep({ onBack }: { onBack: () => void }) {
 
         <button
           type="submit"
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground shadow-[0_16px_34px_rgba(194,101,42,0.22)] transition-all hover:bg-primary/90"
+          disabled={saveStepMutation.isPending}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground shadow-[0_16px_34px_rgba(194,101,42,0.22)] transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          Complete profile
+          {saveStepMutation.isPending ? "Completing..." : "Complete profile"}
           <MaterialSymbol icon="check" className="text-[18px]" />
         </button>
       </div>

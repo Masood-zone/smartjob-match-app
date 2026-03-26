@@ -14,12 +14,14 @@ export function DateField({
   onSelect,
   placeholder,
   hideLabel = false,
+  error,
 }: {
   label: string;
   selected?: Date;
   onSelect: (date?: Date) => void;
   placeholder: string;
   hideLabel?: boolean;
+  error?: string;
 }) {
   const formatted = selected ? formatDate(selected) : placeholder;
 
@@ -53,6 +55,7 @@ export function DateField({
           </div>
         </PopoverContent>
       </Popover>
+      {error ? <p className="text-xs text-destructive">{error}</p> : null}
     </div>
   );
 }

@@ -46,6 +46,7 @@ model User {
   jobSeeker     JobSeeker?
   employer      Employer?
   jobSeekerOnboarding JobSeekerOnboarding?
+  employerOnboarding EmployerOnboarding?
   mediaAssets   MediaAsset[]
   emailVerified Boolean    @default(true)
   image         String?
@@ -137,6 +138,28 @@ model JobSeekerOnboarding {
   @@index([status])
   @@index([currentStep])
   @@map("job_seeker_onboarding")
+}
+
+model EmployerOnboarding {
+  id                String           @id @default(uuid())
+  userId            String           @unique
+  currentStep       Int              @default(0)
+  currentStepKey    String           @default("welcome")
+  status            OnboardingStatus @default(IN_PROGRESS)
+  draftData         Json?
+  basicInfoData     Json?
+  verificationData  Json?
+  teamSetupData     Json?
+  reviewData        Json?
+  completedAt       DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([currentStep])
+  @@map("employer_onboarding")
 }
 
 model Employer {

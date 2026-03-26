@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
-import { saveJobSeekerOnboardingStep } from "@/services/onboarding/job-seeker-onboarding";
+import { useSession } from "@/lib/auth-client";
+import { useStoreJobSeekerOnboardingStep } from "@/services/onboarding/job-seeker-onboarding";
 import { useJobSeekerOnboardingStore } from "@/stores/job-seeker-onboarding-store";
 import {
   Select,
@@ -27,9 +28,11 @@ import { SkillExplorer } from "./skill-explorer";
 import type { JobSeekerOnboardingValues } from "./job-seeker-onboarding-types";
 
 export function IdentityStep({ onContinue }: { onContinue: () => void }) {
-  const { control, setValue, getValues, handleSubmit } =
+  const { control, setValue, getValues, handleSubmit, formState } =
     useFormContext<JobSeekerOnboardingValues>();
   const { saveStepData } = useJobSeekerOnboardingStore();
+  const saveStepMutation = useStoreJobSeekerOnboardingStep();
+  const { data: session } = useSession();
   const skills = useWatch({ control, name: "skills" }) ?? [];
   const qualification = useWatch({ control, name: "qualification" });
   const locationMode = useWatch({ control, name: "locationMode" });
@@ -92,26 +95,52 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
     ? locationCity
     : "custom";
 
-  const onSubmit = handleSubmit((values) => {
-    saveStepData(values);
-    return saveJobSeekerOnboardingStep({
-      stepKey: "identity",
-      values,
-    })
-      .then(() => {
-        toast.success("Identity step saved");
-        onContinue();
-      })
-      .catch((error: Error) => {
-        toast.error(error.message || "Unable to save identity step");
+  useEffect(() => {
+    const sessionEmail = session?.user?.email;
+
+    if (sessionEmail && !getValues("email")) {
+      setValue("email", sessionEmail, {
+        shouldDirty: false,
+        shouldTouch: false,
       });
+    }
+  }, [getValues, session?.user?.email, setValue]);
+
+  const onSubmit = handleSubmit(async (values) => {
+    if (values.skills.length === 0) {
+      toast.error("Select at least one skill before continuing");
+      return;
+    }
+
+    saveStepData(values);
+    try {
+      await saveStepMutation.mutateAsync({
+        stepKey: "identity",
+        values,
+      });
+
+      toast.success("Identity step saved");
+      onContinue();
+    } catch {
+      return;
+    }
   });
 
   return (
     <form className="space-y-8" onSubmit={onSubmit}>
       <div className="grid gap-5 md:grid-cols-2">
-        <Field name="firstName" label="First name" placeholder="E.g. Kofi" />
-        <Field name="lastName" label="Last name" placeholder="E.g. Mensah" />
+        <Field
+          name="firstName"
+          label="First name"
+          placeholder="E.g. Kofi"
+          rules={{ required: "First name is required" }}
+        />
+        <Field
+          name="lastName"
+          label="Last name"
+          placeholder="E.g. Mensah"
+          rules={{ required: "Last name is required" }}
+        />
       </div>
 
       <Field
@@ -119,6 +148,14 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
         label="Professional email"
         type="email"
         placeholder="name@domain.com"
+        readOnly
+        rules={{
+          required: "Professional email is required",
+          pattern: {
+            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            message: "Enter a valid email address",
+          },
+        }}
       />
 
       <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
@@ -129,6 +166,7 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
           <Controller
             control={control}
             name="qualification"
+            rules={{ required: "Select your highest qualification" }}
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger>
@@ -144,6 +182,11 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
               </Select>
             )}
           />
+          {formState.errors.qualification?.message ? (
+            <p className="text-xs text-destructive">
+              {formState.errors.qualification.message}
+            </p>
+          ) : null}
         </div>
 
         <div className="rounded-[1.25rem] border border-outline-variant bg-surface-container-low p-4">
@@ -188,12 +231,18 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
               key={skill}
               type="button"
               onClick={() => toggleSkill(skill)}
-              className="rounded-full border border-primary bg-primary px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-on-primary transition-opacity hover:opacity-90"
+              className="cursor-pointer rounded-full border border-primary bg-primary px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-on-primary transition-opacity hover:opacity-90"
             >
               {skill}
             </button>
           ))}
         </div>
+
+        {formState.submitCount > 0 && skills.length === 0 ? (
+          <p className="text-xs text-destructive">
+            Select at least one skill before continuing.
+          </p>
+        ) : null}
 
         <SkillExplorer
           title="Available skill sectors"
@@ -228,6 +277,7 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
         <Controller
           control={control}
           name="locationMode"
+          rules={{ required: "Choose a work preference" }}
           render={({ field }) => (
             <Select
               value={field.value}
@@ -253,6 +303,11 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
             </Select>
           )}
         />
+        {formState.errors.locationMode?.message ? (
+          <p className="text-xs text-destructive">
+            {formState.errors.locationMode.message}
+          </p>
+        ) : null}
 
         {locationMode === "SPECIFIC_LOCATION" ? (
           <div className="grid gap-5 md:grid-cols-2">
@@ -290,6 +345,7 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
                   name="locationRegion"
                   label="Custom region"
                   placeholder="Type a region"
+                  rules={{ required: "Type your region" }}
                 />
               ) : null}
             </div>
@@ -326,6 +382,7 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
                   name="locationCity"
                   label="Custom city"
                   placeholder="Type a city or town"
+                  rules={{ required: "Type your city or town" }}
                 />
               ) : null}
             </div>
@@ -341,9 +398,10 @@ export function IdentityStep({ onContinue }: { onContinue: () => void }) {
       <div className="flex items-center justify-end pt-2">
         <button
           type="submit"
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground shadow-[0_16px_34px_rgba(194,101,42,0.22)] transition-all hover:bg-primary/90"
+          disabled={saveStepMutation.isPending}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground shadow-[0_16px_34px_rgba(194,101,42,0.22)] transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          Continue
+          {saveStepMutation.isPending ? "Saving..." : "Continue"}
           <MaterialSymbol icon="arrow_forward" className="text-[18px]" />
         </button>
       </div>
