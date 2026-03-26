@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
+import { signOut } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 const navigationItems = [
@@ -31,6 +32,13 @@ interface AdminShellProps {
 
 export function AdminShell({ children }: AdminShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push("/");
+    router.refresh();
+  };
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
@@ -78,13 +86,14 @@ export function AdminShell({ children }: AdminShellProps) {
               <MaterialSymbol icon="help_outline" className="text-lg" />
               <span>Support</span>
             </a>
-            <a
-              className="flex items-center gap-3 px-4 py-2 text-sm text-on-surface-variant transition-colors hover:text-[#c2652a]"
-              href="#"
+            <button
+              type="button"
+              onClick={() => void handleLogout()}
+              className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-on-surface-variant transition-colors hover:text-[#c2652a]"
             >
-              <MaterialSymbol icon="settings" className="text-lg" />
-              <span>Settings</span>
-            </a>
+              <MaterialSymbol icon="logout" className="text-lg" />
+              <span>Logout</span>
+            </button>
           </div>
         </div>
       </aside>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { OnboardingStatus, VerificationStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { notificationsService } from "@/lib/notifications";
 
 const allowedStatuses = new Set<VerificationStatus>([
   "PENDING",
@@ -11,9 +12,10 @@ const allowedStatuses = new Set<VerificationStatus>([
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const body = (await request.json()) as { status?: string };
 
     if (!allowedStatuses.has(body.status as VerificationStatus)) {
@@ -24,8 +26,18 @@ export async function PATCH(
     }
 
     const employer = await prisma.employer.findUnique({
-      where: { id: params.id },
-      select: { id: true, userId: true },
+      where: { id },
+      select: {
+        id: true,
+        userId: true,
+        companyName: true,
+        user: {
+          select: {
+            email: true,
+            name: true,
+          },
+        },
+      },
     });
 
     if (!employer) {
@@ -59,6 +71,16 @@ export async function PATCH(
         completedAt: verificationStatus === "APPROVED" ? new Date() : undefined,
       },
     });
+
+    try {
+      await notificationsService.sendEmployerDecisionEmail({
+        email: employer.user.email,
+        name: employer.companyName || employer.user.name,
+        approved: verificationStatus === "APPROVED",
+      });
+    } catch (error) {
+      console.error("Failed to send employer decision email:", error);
+    }
 
     return NextResponse.json({ ok: true, onboarding });
   } catch (error) {

@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { OnboardingStatus, VerificationStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import {
+  clearMatchesForSeeker,
+  rebuildMatchesForSeeker,
+} from "@/lib/matching/sync";
+import { notificationsService } from "@/lib/notifications";
 
 const allowedStatuses = new Set<VerificationStatus>([
   "PENDING",
@@ -11,9 +16,10 @@ const allowedStatuses = new Set<VerificationStatus>([
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const body = (await request.json()) as { status?: string };
 
     if (!allowedStatuses.has(body.status as VerificationStatus)) {
@@ -24,8 +30,17 @@ export async function PATCH(
     }
 
     const seeker = await prisma.jobSeeker.findUnique({
-      where: { id: params.id },
-      select: { id: true, userId: true },
+      where: { id },
+      select: {
+        id: true,
+        userId: true,
+        user: {
+          select: {
+            email: true,
+            name: true,
+          },
+        },
+      },
     });
 
     if (!seeker) {
@@ -59,6 +74,33 @@ export async function PATCH(
         completedAt: verificationStatus === "APPROVED" ? new Date() : undefined,
       },
     });
+
+    try {
+      await notificationsService.sendJobSeekerDecisionEmail({
+        email: seeker.user.email,
+        name: seeker.user.name,
+        approved: verificationStatus === "APPROVED",
+      });
+    } catch (error) {
+      console.error("Failed to send job seeker decision email:", error);
+    }
+
+    if (verificationStatus === "APPROVED") {
+      try {
+        await rebuildMatchesForSeeker(seeker.userId);
+      } catch (error) {
+        console.error("Failed to rebuild matches for approved seeker:", error);
+      }
+    } else {
+      try {
+        await clearMatchesForSeeker(seeker.id);
+      } catch (error) {
+        console.error(
+          "Failed to clear matches for non-approved seeker:",
+          error,
+        );
+      }
+    }
 
     return NextResponse.json({ ok: true, onboarding });
   } catch (error) {

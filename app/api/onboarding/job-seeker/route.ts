@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { OnboardingStatus, Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { rebuildMatchesForSeeker } from "@/lib/matching/sync";
 import { notificationsService } from "@/lib/notifications";
 
 const stepRecordFields = {
@@ -161,6 +162,12 @@ export async function POST(request: Request) {
         .filter(Boolean)
         .join(" ")
         .trim();
+
+      try {
+        await rebuildMatchesForSeeker(user.id);
+      } catch (error) {
+        console.error("Failed to rebuild matches for job seeker:", error);
+      }
 
       try {
         await notificationsService.sendJobSeekerWelcomeEmail({
