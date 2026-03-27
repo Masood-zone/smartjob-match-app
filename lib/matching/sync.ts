@@ -45,6 +45,8 @@ type JobMatchSource = {
   title: string;
   description: string;
   requiredQualification: QualificationLevel;
+  requiredSkills?: string[];
+  location?: string | null;
 };
 
 function isRecord(value: unknown): value is JsonRecord {
@@ -166,6 +168,8 @@ function buildJobData(job: JobMatchSource): JobData {
     title: job.title,
     description: job.description,
     requiredQualification: job.requiredQualification,
+    requiredSkills: job.requiredSkills,
+    location: job.location ?? undefined,
   };
 }
 
@@ -242,6 +246,8 @@ export async function rebuildMatchesForSeeker(userId: string) {
         title: true,
         description: true,
         requiredQualification: true,
+        requiredSkills: true,
+        location: true,
       },
     }),
     getAlgorithmConfig(),
@@ -266,6 +272,8 @@ export async function rebuildMatchesForJob(jobId: string) {
       title: true,
       description: true,
       requiredQualification: true,
+      requiredSkills: true,
+      location: true,
     },
   });
 
