@@ -292,7 +292,7 @@ export function EmployerApplicantsPage({
                     <div className="h-24 animate-pulse rounded-[1.25rem] bg-surface-container-low" />
                     <div className="h-24 animate-pulse rounded-[1.25rem] bg-surface-container-low" />
                   </div>
-                  <div className="h-[32rem] animate-pulse rounded-[1.75rem] border border-outline-variant bg-surface" />
+                  <div className="h-128 animate-pulse rounded-[1.75rem] border border-outline-variant bg-surface" />
                 </div>
               ) : applicants.length === 0 ? (
                 <div className="rounded-[1.75rem] border border-dashed border-outline-variant bg-surface p-8 text-center text-on-surface-variant">
@@ -482,7 +482,7 @@ export function EmployerApplicantsPage({
                             </div>
 
                             <div className="relative mt-6 space-y-8">
-                              <div className="absolute left-[11px] top-2 bottom-2 w-px bg-outline-variant" />
+                              <div className="absolute left-2.75 top-2 bottom-2 w-px bg-outline-variant" />
                               {(selectedProfile?.experience.length
                                 ? selectedProfile.experience
                                 : [

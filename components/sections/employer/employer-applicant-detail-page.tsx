@@ -238,7 +238,7 @@ export function EmployerApplicantDetailPage({
                       </div>
 
                       <div className="relative mt-6 space-y-8">
-                        <div className="absolute left-[11px] top-2 bottom-2 w-px bg-outline-variant" />
+                        <div className="absolute left-2.75 top-2 bottom-2 w-px bg-outline-variant" />
                         {(data.seeker.profile?.experience.length
                           ? data.seeker.profile.experience
                           : [
