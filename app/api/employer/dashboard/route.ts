@@ -40,6 +40,7 @@ function parseExperience(value: unknown) {
 
 function formatCompany(employer: {
   id: string;
+  userId: string;
   companyName: string | null;
   user: {
     name: string;

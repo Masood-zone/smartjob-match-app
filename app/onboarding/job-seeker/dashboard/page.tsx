@@ -1,9 +1,9 @@
-import { JobSeekerDashboard } from "@/components/sections/dashboard/job-seeker-dashboard";
+import { JobSeekerDashboardPage } from "@/components/sections/job-seeker/job-seeker-dashboard-pages";
 
 export const metadata = {
   title: "Job Seeker Dashboard",
 };
 
-export default function JobSeekerDashboardPage() {
-  return <JobSeekerDashboard />;
+export default function JobSeekerDashboardRoutePage() {
+  return <JobSeekerDashboardPage />;
 }

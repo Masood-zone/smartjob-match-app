@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -9,8 +10,8 @@ import { signOut, useSession } from "@/lib/auth-client";
 
 type ActiveSection =
   | "dashboard"
-  | "applicants"
   | "jobs"
+  | "matches"
   | "analytics"
   | "settings";
 
@@ -22,37 +23,37 @@ const navItems: Array<{
 }> = [
   {
     label: "Dashboard",
-    href: "/onboarding/employer/dashboard",
+    href: "/onboarding/job-seeker/dashboard",
     icon: "dashboard",
     key: "dashboard",
   },
   {
-    label: "Candidate Pool",
-    href: "/onboarding/employer/applicants",
-    icon: "groups",
-    key: "applicants",
-  },
-  {
-    label: "Postings",
-    href: "/onboarding/employer/jobs/new",
+    label: "Jobs",
+    href: "/onboarding/job-seeker/dashboard/jobs",
     icon: "work",
     key: "jobs",
   },
   {
+    label: "Matches",
+    href: "/onboarding/job-seeker/dashboard/matches",
+    icon: "auto_awesome",
+    key: "matches",
+  },
+  {
     label: "Analytics",
-    href: "/onboarding/employer/analytics",
+    href: "/onboarding/job-seeker/dashboard/analytics",
     icon: "trending_up",
     key: "analytics",
   },
   {
     label: "Settings",
-    href: "/onboarding/employer/settings",
+    href: "/onboarding/job-seeker/dashboard/settings",
     icon: "settings",
     key: "settings",
   },
 ];
 
-export function EmployerPortalShell({
+export function JobSeekerPortalShell({
   activeSection,
   actionHref,
   actionLabel,
@@ -82,7 +83,7 @@ export function EmployerPortalShell({
               Qualify
             </span>
             <p className="mt-1 text-[10px] font-medium uppercase tracking-wider text-stone-500">
-              Recruitment Portal
+              Job Seeker Portal
             </p>
           </div>
 
@@ -109,7 +110,7 @@ export function EmployerPortalShell({
             {actionHref && actionLabel ? (
               <Link
                 href={actionHref}
-                className="mb-6 inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-3 text-xs font-bold uppercase tracking-widest text-on-primary transition-all hover:opacity-90"
+                className="mb-3 inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-3 text-xs font-bold uppercase tracking-widest text-on-primary transition-all hover:opacity-90"
               >
                 {actionLabel}
               </Link>
@@ -153,13 +154,13 @@ export function EmployerPortalShell({
                     Resources
                   </Link>
                   <Link
-                    href="/onboarding/employer/analytics"
+                    href="/onboarding/job-seeker/dashboard/analytics"
                     className="text-sm text-stone-600 transition-colors hover:text-[#c2652a]"
                   >
                     Analytics
                   </Link>
                   <Link
-                    href="/onboarding/employer/settings"
+                    href="/onboarding/job-seeker/dashboard/settings"
                     className="text-sm text-stone-600 transition-colors hover:text-[#c2652a]"
                   >
                     Settings
@@ -171,7 +172,7 @@ export function EmployerPortalShell({
                 <div className="relative hidden sm:block">
                   <input
                     className="w-64 rounded-full border border-outline-variant bg-surface-container-low py-2 pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                    placeholder="Search talent..."
+                    placeholder="Search matches..."
                     type="text"
                   />
                   <MaterialSymbol
@@ -180,20 +181,13 @@ export function EmployerPortalShell({
                   />
                 </div>
 
-                {actionHref && actionLabel ? (
-                  <Link
-                    href={actionHref}
-                    className="rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-on-primary transition-all hover:opacity-90"
-                  >
-                    {actionLabel}
-                  </Link>
-                ) : null}
-
                 <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-outline-variant bg-surface-container-highest text-primary">
                   {session?.user?.image ? (
-                    <img
-                      alt={session.user.name || "Recruiter profile"}
+                    <Image
+                      alt={session.user.name || "Job seeker profile"}
                       src={session.user.image}
+                      width={40}
+                      height={40}
                       className="h-full w-full object-cover"
                     />
                   ) : (

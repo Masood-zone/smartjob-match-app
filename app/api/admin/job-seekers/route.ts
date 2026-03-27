@@ -66,10 +66,9 @@ export async function GET() {
       const reviewData = asObject(onboarding?.reviewData);
       const experienceData = onboarding?.experienceData;
       const experienceEntries = Array.isArray(experienceData)
-        ? experienceData.filter(
-            (entry): entry is Record<string, unknown> =>
-              typeof entry === "object" && entry !== null,
-          )
+        ? (experienceData.filter(
+            (entry) => typeof entry === "object" && entry !== null,
+          ) as Record<string, unknown>[])
         : [];
 
       const fullName = joinName(

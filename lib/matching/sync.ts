@@ -68,7 +68,7 @@ function isQualificationLevel(value: unknown): value is QualificationLevel {
   );
 }
 
-function toStringArray(value: Prisma.JsonValue | null | undefined): string[] {
+function toStringArray(value: unknown): string[] {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
     : [];
@@ -81,9 +81,12 @@ function toExperienceEntries(
     return [];
   }
 
-  return value
-    .filter(isRecord)
-    .map((entry) => ({
+  return value.reduce<JobSeekerExperience[]>((entries, entry) => {
+    if (!isRecord(entry)) {
+      return entries;
+    }
+
+    const experienceEntry = {
       jobTitle: toStringValue(entry.jobTitle),
       companyName: toStringValue(entry.companyName),
       startDate:
@@ -95,13 +98,18 @@ function toExperienceEntries(
           ? entry.endDate
           : undefined,
       description: toStringValue(entry.description),
-    }))
-    .filter(
-      (entry) =>
-        entry.jobTitle.length > 0 ||
-        entry.companyName.length > 0 ||
-        entry.description.length > 0,
-    );
+    };
+
+    if (
+      experienceEntry.jobTitle.length > 0 ||
+      experienceEntry.companyName.length > 0 ||
+      experienceEntry.description.length > 0
+    ) {
+      entries.push(experienceEntry);
+    }
+
+    return entries;
+  }, []);
 }
 
 function buildLocationPreference(identityData: JsonRecord) {
