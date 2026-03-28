@@ -1,9 +1,9 @@
-import { JobsPage } from "@/components/sections/jobs/jobs-page";
+import { JobsBrowserPage } from "@/components/sections/jobs/jobs-browser-page";
 
 export const metadata = {
   title: "Job Listings",
 };
 
 export default function JobsRoute() {
-  return <JobsPage />;
+  return <JobsBrowserPage />;
 }

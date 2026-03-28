@@ -105,6 +105,7 @@ export async function GET(request: Request) {
         orderBy: { updatedAt: "desc" },
         take: 6,
         include: {
+          interview: true,
           job: {
             include: {
               employer: {
@@ -195,6 +196,14 @@ export async function GET(request: Request) {
         location: application.job.location || "Unspecified",
         appliedAt: application.createdAt.toISOString(),
         updatedAt: application.updatedAt.toISOString(),
+        interview: application.interview
+          ? {
+              id: application.interview.id,
+              date: application.interview.date.toISOString(),
+              location: application.interview.location,
+              notes: application.interview.notes,
+            }
+          : null,
       };
     });
 

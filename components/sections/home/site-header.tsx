@@ -10,10 +10,11 @@ import { useSession } from "@/lib/auth-client";
 import { SessionAvatarBadge } from "./session-avatar-badge";
 
 const navigationItems = [
-  { label: "Find Jobs", href: "/" },
+  { label: "Home", href: "/" },
+  { label: "Jobs", href: "/jobs" },
+  { label: "Companies", href: "/companies" },
   { label: "About", href: "/about" },
   { label: "Resources", href: "/resources" },
-  { label: "Companies", href: "/companies" },
 ];
 
 type HeaderRole = "USER" | "JOB_SEEKER" | "EMPLOYER" | "ADMIN";

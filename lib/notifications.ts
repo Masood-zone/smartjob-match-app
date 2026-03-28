@@ -22,6 +22,35 @@ interface VerificationDecisionEmailArgs extends WelcomeEmailArgs {
   ctaUrl?: string;
 }
 
+interface ApplicationReceivedEmailArgs {
+  employerEmail: string;
+  employerName?: string;
+  seekerName?: string;
+  jobTitle: string;
+  companyName: string;
+  applicationId: string;
+  matchScore?: number;
+  dashboardUrl?: string;
+}
+
+interface ApplicationUpdateEmailArgs extends WelcomeEmailArgs {
+  approved: boolean;
+  jobTitle: string;
+  companyName: string;
+  applicationId: string;
+  dashboardUrl?: string;
+}
+
+interface InterviewScheduledEmailArgs extends WelcomeEmailArgs {
+  jobTitle: string;
+  companyName: string;
+  applicationId: string;
+  interviewDate: string;
+  interviewLocation: string;
+  notes?: string | null;
+  dashboardUrl?: string;
+}
+
 function normalizeName(name?: string, email?: string): string | undefined {
   const trimmedName = name?.trim();
   if (trimmedName) return trimmedName;
@@ -113,6 +142,198 @@ class NotificationsService {
         closing: args.closing,
       }),
       text: buildTextSummary(args.title, args.steps, args.ctaUrl),
+    });
+  }
+
+  async sendEmployerApplicationReceivedEmail(
+    args: ApplicationReceivedEmailArgs,
+  ): Promise<void> {
+    const appName = getAppName();
+    const dashboardUrl =
+      args.dashboardUrl || `${getAppUrl()}/onboarding/employer/applicants`;
+    const recipientName = normalizeName(args.employerName, args.employerEmail);
+
+    const steps: NotificationStep[] = [
+      {
+        title: "Review the new applicant",
+        description:
+          "Open the application and review the candidate profile, match score, and submitted details.",
+      },
+      {
+        title: "Compare fit for the role",
+        description:
+          "Check how the seeker aligns with the qualification and skills you requested.",
+      },
+      {
+        title: "Choose the next action",
+        description:
+          "Shortlist the candidate, schedule an interview, or reject the application if it is not a fit.",
+      },
+    ];
+
+    await emailService.sendReactEmail({
+      to: args.employerEmail,
+      subject: `New application received for ${args.jobTitle} - ${appName}`,
+      component: createElement(PlatformNotificationEmail, {
+        appName,
+        recipientName,
+        eyebrow: "New application",
+        title: `A new candidate applied for ${args.jobTitle}`,
+        lead: `${args.seekerName || "A candidate"} has submitted an application for ${args.jobTitle} at ${args.companyName}. The application is ready for review from your employer dashboard.`,
+        steps,
+        ctaLabel: "Review application",
+        ctaUrl: dashboardUrl,
+        ctaNote:
+          typeof args.matchScore === "number"
+            ? `Initial match score: ${args.matchScore.toFixed(0)}%.`
+            : "Open the dashboard to review the full application profile.",
+        closing:
+          "The best hiring decisions usually come from timely review and clear next steps.",
+      }),
+      text: buildTextSummary(
+        `A new candidate applied for ${args.jobTitle}`,
+        steps,
+        dashboardUrl,
+      ),
+    });
+  }
+
+  async sendJobSeekerApplicationUpdateEmail(
+    args: ApplicationUpdateEmailArgs,
+  ): Promise<void> {
+    const appUrl = getAppUrl();
+    const dashboardUrl =
+      args.dashboardUrl ||
+      `${appUrl}/onboarding/job-seeker/dashboard/applications/${args.applicationId}`;
+
+    const content = buildDecisionEmailContent({
+      approved: args.approved,
+      approvedTitle: `Your application for ${args.jobTitle} has been shortlisted`,
+      rejectedTitle: `Your application for ${args.jobTitle} was not selected`,
+      approvedLead:
+        "The employer has moved your application forward. You can review the application details and prepare for the next step if a meeting is added.",
+      rejectedLead:
+        "The employer has reviewed your application and decided not to proceed with this role.",
+      approvedSteps: [
+        {
+          title: "Open the application details",
+          description:
+            "Check the latest status, notes, and any interview information added by the employer.",
+        },
+        {
+          title: "Stay ready for follow-up",
+          description:
+            "If a meeting is added, respond quickly so the hiring process keeps moving.",
+        },
+        {
+          title: "Keep applying strategically",
+          description:
+            "Continue reviewing relevant matches so you always have active opportunities in progress.",
+        },
+      ],
+      rejectedSteps: [
+        {
+          title: "Review the role details",
+          description:
+            "Use the application history to understand what the role asked for and how it compares with your profile.",
+        },
+        {
+          title: "Improve your profile where needed",
+          description:
+            "Update your experience, skills, or qualifications so future applications stay competitive.",
+        },
+        {
+          title: "Apply to other relevant roles",
+          description:
+            "Move quickly to the next fit so your job search keeps momentum.",
+        },
+      ],
+      approvedCtaLabel: "View application",
+      rejectedCtaLabel: "View application",
+      approvedCtaUrl: dashboardUrl,
+      rejectedCtaUrl: dashboardUrl,
+      approvedCtaNote:
+        "If the employer adds a meeting or notes, they will appear in the application detail page.",
+      rejectedCtaNote:
+        "The application history is still available for future reference.",
+      approvedClosing:
+        "Keep an eye on your dashboard so you can respond quickly to the next update.",
+      rejectedClosing:
+        "Use the feedback to shape stronger applications going forward.",
+    });
+
+    await this.sendDecisionEmail({
+      ...args,
+      subject: args.approved
+        ? `Your application has been shortlisted - ${getAppName()}`
+        : `Update on your application - ${getAppName()}`,
+      eyebrow: args.approved ? "Application shortlisted" : "Application closed",
+      title: content.title,
+      lead: content.lead,
+      steps: content.steps,
+      ctaLabel: content.ctaLabel,
+      ctaUrl: content.ctaUrl,
+      ctaNote: content.ctaNote,
+      closing: content.closing,
+    });
+  }
+
+  async sendJobSeekerInterviewScheduledEmail(
+    args: InterviewScheduledEmailArgs,
+  ): Promise<void> {
+    const appName = getAppName();
+    const dashboardUrl =
+      args.dashboardUrl ||
+      `${getAppUrl()}/onboarding/job-seeker/dashboard/applications/${args.applicationId}`;
+    const recipientName = normalizeName(args.name, args.email);
+    const interviewDate = new Date(args.interviewDate);
+    const formattedDate = Number.isNaN(interviewDate.getTime())
+      ? args.interviewDate
+      : interviewDate.toLocaleString("en-US", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        });
+
+    const steps: NotificationStep[] = [
+      {
+        title: "Review the meeting details",
+        description: `Your interview is scheduled for ${formattedDate} at ${args.interviewLocation}.`,
+      },
+      {
+        title: "Prepare for the conversation",
+        description:
+          "Bring the essentials: your updated profile, notes about the role, and any documents the employer may need.",
+      },
+      {
+        title: "Watch for follow-up instructions",
+        description: args.notes?.trim()
+          ? args.notes.trim()
+          : "If the employer requests a call or sends additional notes, respond promptly so the process keeps moving.",
+      },
+    ];
+
+    await emailService.sendReactEmail({
+      to: args.email,
+      subject: `Interview scheduled for ${args.jobTitle} - ${appName}`,
+      component: createElement(PlatformNotificationEmail, {
+        appName,
+        recipientName,
+        eyebrow: "Interview scheduled",
+        title: `Your interview for ${args.jobTitle} is confirmed`,
+        lead: `The employer at ${args.companyName} has added a meeting for your application. Please review the details below and prepare ahead of time.`,
+        steps,
+        ctaLabel: "View application",
+        ctaUrl: dashboardUrl,
+        ctaNote:
+          "If the employer adds notes or asks for a call, you will see the latest update in your dashboard.",
+        closing:
+          "Staying prepared and responsive helps the hiring process stay smooth for everyone involved.",
+      }),
+      text: buildTextSummary(
+        `Your interview for ${args.jobTitle} is confirmed`,
+        steps,
+        dashboardUrl,
+      ),
     });
   }
 

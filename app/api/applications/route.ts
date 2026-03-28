@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { computeMatch } from "@/lib/matching";
 import { prisma } from "@/lib/prisma";
+import { notificationsService } from "@/lib/notifications";
 import { getRequestSessionUser } from "@/lib/request-session";
 
 const defaultAlgorithmConfig = {
@@ -211,8 +212,12 @@ export async function POST(request: Request) {
             user: {
               select: {
                 id: true,
+                name: true,
+                email: true,
+                image: true,
                 employerOnboarding: {
                   select: {
+                    basicInfoData: true,
                     verificationStatus: true,
                     status: true,
                   },
@@ -298,6 +303,30 @@ export async function POST(request: Request) {
 
       return createdApplication;
     });
+
+    if (!existingApplication) {
+      const employerBasicInfo = asRecord(
+        job.employer.user.employerOnboarding?.basicInfoData,
+      );
+      const companyName = toString(
+        employerBasicInfo.companyName,
+        job.employer.user.name || "Unnamed company",
+      );
+
+      void notificationsService
+        .sendEmployerApplicationReceivedEmail({
+          employerEmail: job.employer.user.email,
+          employerName: job.employer.user.name,
+          seekerName: seeker.user.name,
+          jobTitle: job.title,
+          companyName,
+          applicationId: application.id,
+          matchScore: matchResult.score,
+        })
+        .catch((error) => {
+          console.error("Failed to send employer application email:", error);
+        });
+    }
 
     return NextResponse.json({
       data: {

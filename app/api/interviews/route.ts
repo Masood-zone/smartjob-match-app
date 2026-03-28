@@ -1,7 +1,20 @@
 import { NextResponse } from "next/server";
 
+import { notificationsService } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import { getRequestSessionUser } from "@/lib/request-session";
+
+function asRecord(value: unknown) {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function toString(value: unknown, fallback = "") {
+  return typeof value === "string" && value.trim().length > 0
+    ? value.trim()
+    : fallback;
+}
 
 export async function POST(request: Request) {
   try {
@@ -75,7 +88,33 @@ export async function POST(request: Request) {
         job: {
           select: {
             id: true,
+            title: true,
             employerId: true,
+            employer: {
+              select: {
+                user: {
+                  select: {
+                    name: true,
+                    email: true,
+                    employerOnboarding: {
+                      select: {
+                        basicInfoData: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        jobSeeker: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
           },
         },
       },
@@ -95,6 +134,11 @@ export async function POST(request: Request) {
       );
     }
 
+    const previousInterview = await prisma.interview.findUnique({
+      where: { applicationId },
+      select: { id: true },
+    });
+
     const interview = await prisma.interview.upsert({
       where: { applicationId },
       create: {
@@ -109,6 +153,32 @@ export async function POST(request: Request) {
         notes: notes || null,
       },
     });
+
+    const employerBasicInfo = asRecord(
+      application.job.employer.user.employerOnboarding?.basicInfoData,
+    );
+    const companyName = toString(
+      employerBasicInfo.companyName,
+      application.job.employer.user.name || "Unnamed company",
+    );
+
+    void notificationsService
+      .sendJobSeekerInterviewScheduledEmail({
+        email: application.jobSeeker.user.email,
+        name: application.jobSeeker.user.name,
+        jobTitle: application.job.title,
+        companyName,
+        applicationId,
+        interviewDate: interview.date.toISOString(),
+        interviewLocation: interview.location,
+        notes: interview.notes,
+        dashboardUrl: previousInterview
+          ? `${process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/onboarding/job-seeker/dashboard/applications/${applicationId}`
+          : undefined,
+      })
+      .catch((error) => {
+        console.error("Failed to send interview email:", error);
+      });
 
     return NextResponse.json({
       ok: true,

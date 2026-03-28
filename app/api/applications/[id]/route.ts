@@ -1,6 +1,7 @@
 import { ApplicationStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
 
+import { notificationsService } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import { getRequestSessionUser } from "@/lib/request-session";
 
@@ -98,6 +99,22 @@ export async function GET(
             requiredQualification: true,
             requiredSkills: true,
             employerId: true,
+            employer: {
+              select: {
+                companyName: true,
+                user: {
+                  select: {
+                    name: true,
+                    image: true,
+                    employerOnboarding: {
+                      select: {
+                        basicInfoData: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
         jobSeeker: {
@@ -137,11 +154,41 @@ export async function GET(
       );
     }
 
+    const company = await prisma.employer.findUnique({
+      where: { id: application.job.employerId },
+      select: {
+        companyName: true,
+        user: {
+          select: {
+            name: true,
+            image: true,
+            employerOnboarding: {
+              select: {
+                basicInfoData: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
     const onboarding = application.jobSeeker.user.jobSeekerOnboarding;
     const identityData = asRecord(onboarding?.identityData);
     const qualificationData = asRecord(onboarding?.qualificationData);
     const reviewData = asRecord(onboarding?.reviewData);
     const experienceData = parseExperience(onboarding?.experienceData);
+    const employerBasicInfo = asRecord(
+      company?.user.employerOnboarding?.basicInfoData,
+    );
+    const companyName = toString(
+      employerBasicInfo.companyName,
+      company?.companyName || company?.user.name || "Unnamed company",
+    );
+    const companyIndustry = toString(employerBasicInfo.industry, "Unspecified");
+    const companyLocation =
+      [toString(employerBasicInfo.city), toString(employerBasicInfo.country)]
+        .filter(Boolean)
+        .join(", ") || "Unspecified";
 
     const fullName =
       [toString(identityData.firstName), toString(identityData.lastName)]
@@ -188,6 +235,13 @@ export async function GET(
           location: application.job.location || "Unspecified",
           requiredQualification: application.job.requiredQualification,
           requiredSkills: application.job.requiredSkills,
+          company: {
+            id: application.job.employerId,
+            name: companyName,
+            industry: companyIndustry,
+            location: companyLocation,
+            logoUrl: company?.user.image ?? null,
+          },
         },
         seeker: {
           id: application.jobSeeker.id,
@@ -319,7 +373,34 @@ export async function PATCH(
         job: {
           select: {
             id: true,
+            title: true,
             employerId: true,
+            employer: {
+              select: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    employerOnboarding: {
+                      select: {
+                        basicInfoData: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        jobSeeker: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
           },
         },
       },
@@ -339,12 +420,54 @@ export async function PATCH(
       );
     }
 
+    const company = await prisma.employer.findUnique({
+      where: { id: application.job.employerId },
+      select: {
+        companyName: true,
+        user: {
+          select: {
+            name: true,
+            email: true,
+            employerOnboarding: {
+              select: {
+                basicInfoData: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const previousStatus = application.status;
     const updated = await prisma.application.update({
       where: { id },
       data: {
         status: body.status as ApplicationStatus,
       },
     });
+
+    if (previousStatus !== updated.status) {
+      const employerBasicInfo = asRecord(
+        company?.user.employerOnboarding?.basicInfoData,
+      );
+      const companyName = toString(
+        employerBasicInfo.companyName,
+        company?.companyName || company?.user.name || "Unnamed company",
+      );
+
+      void notificationsService
+        .sendJobSeekerApplicationUpdateEmail({
+          email: application.jobSeeker.user.email,
+          name: application.jobSeeker.user.name,
+          approved: updated.status === "ACCEPTED",
+          jobTitle: application.job.title,
+          companyName,
+          applicationId: updated.id,
+        })
+        .catch((error) => {
+          console.error("Failed to send application update email:", error);
+        });
+    }
 
     return NextResponse.json({
       ok: true,

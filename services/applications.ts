@@ -55,6 +55,13 @@ export interface ApplicationDetailResponse {
       location: string;
       requiredQualification: string;
       requiredSkills: string[];
+      company: {
+        id: string;
+        name: string;
+        industry: string;
+        location: string;
+        logoUrl: string | null;
+      };
     };
     seeker: {
       id: string;
@@ -89,6 +96,23 @@ export interface ApplicationDetailResponse {
         } | null;
         notes: string;
       };
+    };
+  };
+}
+
+export interface JobSeekerApplicationDetailResponse {
+  data: ApplicationDetailResponse["data"] & {
+    job: ApplicationDetailResponse["data"]["job"] & {
+      description: string;
+    };
+    tracking: {
+      statusHeadline: string;
+      nextAction: string;
+      timeline: Array<{
+        title: string;
+        description: string;
+        completed: boolean;
+      }>;
     };
   };
 }
@@ -130,10 +154,31 @@ async function fetchApplication(applicationId: string) {
   }
 }
 
+async function fetchJobSeekerApplication(applicationId: string) {
+  try {
+    const response = await api.get<JobSeekerApplicationDetailResponse>(
+      `/api/job-seeker/applications/${applicationId}`,
+    );
+
+    return response.data.data;
+  } catch (error) {
+    throw new Error(getAxiosErrorMessage(error));
+  }
+}
+
 export function useApplicationQuery(applicationId: string) {
   return useQuery({
     queryKey: [...applicationQueryKey, applicationId],
     queryFn: () => fetchApplication(applicationId),
+    staleTime: 20_000,
+    enabled: Boolean(applicationId),
+  });
+}
+
+export function useJobSeekerApplicationQuery(applicationId: string) {
+  return useQuery({
+    queryKey: [...applicationQueryKey, "job-seeker", applicationId],
+    queryFn: () => fetchJobSeekerApplication(applicationId),
     staleTime: 20_000,
     enabled: Boolean(applicationId),
   });

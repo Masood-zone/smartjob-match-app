@@ -36,6 +36,12 @@ export interface JobSeekerDashboardRecentApplication {
   location: string;
   appliedAt: string;
   updatedAt: string;
+  interview: {
+    id: string;
+    date: string;
+    location: string;
+    notes: string | null;
+  } | null;
 }
 
 export interface JobSeekerDashboardRecentMatch {
