@@ -37,6 +37,8 @@ export function EmployerDashboard() {
     [data?.recentApplications],
   );
 
+  const rejectedReason = data?.employer.rejectionReason?.trim() || null;
+
   const handleLogout = () => {
     void Promise.resolve(signOut()).finally(() => {
       router.replace("/login");
@@ -170,6 +172,40 @@ export function EmployerDashboard() {
                   >
                     Log out
                   </button>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          {data?.employer.verificationStatus === "REJECTED" ? (
+            <section className="overflow-hidden rounded-[2rem] border border-rose-200 bg-rose-50 p-6 text-rose-800 shadow-[0_18px_50px_rgba(58,48,42,0.08)] sm:p-8">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                <div className="max-w-3xl space-y-3">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-rose-700">
+                    <MaterialSymbol icon="error" className="text-[16px]" />
+                    Company profile rejected
+                  </div>
+                  <h2 className="text-3xl tracking-tight sm:text-4xl">
+                    Your company profile needs updates before you can continue
+                    hiring
+                  </h2>
+                  <p className="max-w-2xl text-sm leading-7 sm:text-base">
+                    {rejectedReason ||
+                      "A reviewer marked your company profile as needing changes. Update the onboarding details and resubmit them for another review."}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/onboarding/employer"
+                    className="inline-flex items-center gap-2 rounded-full bg-rose-700 px-5 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-white shadow-sm transition-colors hover:bg-rose-800"
+                  >
+                    Update profile and resubmit
+                    <MaterialSymbol
+                      icon="arrow_forward"
+                      className="text-[16px]"
+                    />
+                  </Link>
                 </div>
               </div>
             </section>

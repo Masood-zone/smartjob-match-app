@@ -711,9 +711,12 @@ export function EmployerApplicantsPage({
                                 },
                               )
                             }
-                            className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-primary-foreground"
+                            className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                            disabled={scheduleInterviewMutation.isPending}
                           >
-                            Save interview
+                            {scheduleInterviewMutation.isPending
+                              ? "Saving..."
+                              : "Save interview"}
                           </button>
                         </div>
                       </section>
@@ -739,12 +742,14 @@ function SummaryCard({
   copy: string;
 }) {
   return (
-    <div className="rounded-[1.5rem] border border-outline-variant bg-surface p-5 shadow-[0_12px_34px_rgba(58,48,42,0.05)]">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
+    <div className="rounded-[1.35rem] border border-outline-variant bg-surface-container-low p-5">
+      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-on-surface-variant">
         {label}
       </p>
-      <p className="mt-3 text-3xl tracking-tight text-on-surface">{value}</p>
-      <p className="mt-2 text-sm text-on-surface-variant">{copy}</p>
+      <p className="mt-2 text-3xl font-semibold tracking-tight text-on-surface">
+        {value}
+      </p>
+      <p className="mt-3 text-sm leading-7 text-on-surface-variant">{copy}</p>
     </div>
   );
 }
@@ -761,19 +766,19 @@ function MetricCard({
   icon: string;
 }) {
   return (
-    <div className="rounded-[1.25rem] border border-outline-variant bg-surface p-4 shadow-[0_2px_16px_rgba(58,48,42,0.04)]">
-      <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <MaterialSymbol icon={icon} className="text-[18px]" />
+    <div className="rounded-[1.35rem] border border-outline-variant bg-surface-container-low p-5">
+      <div className="flex items-center gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <MaterialSymbol icon={icon} className="text-[20px]" />
         </div>
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-secondary">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant">
             {label}
           </p>
-          <p className="font-bold text-on-surface">{title}</p>
+          <p className="mt-1 text-lg font-semibold text-on-surface">{title}</p>
         </div>
       </div>
-      <p className="text-sm text-on-surface-variant">{copy}</p>
+      <p className="mt-4 text-sm leading-7 text-on-surface-variant">{copy}</p>
     </div>
   );
 }

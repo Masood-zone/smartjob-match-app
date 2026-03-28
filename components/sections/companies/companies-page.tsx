@@ -106,67 +106,75 @@ export function CompaniesPage() {
             ? Array.from({ length: 6 }).map((_, index) => (
                 <article
                   key={`company-skeleton-${index}`}
-                  className="h-80 animate-pulse rounded-[1.75rem] border border-outline-variant bg-surface"
+                  className="h-80 animate-pulse rounded-[1.75rem] border border-outline-variant bg-surface-container-lowest"
                 />
               ))
             : companies.map((company) => (
                 <Link
                   key={company.id}
                   href={`/companies/${company.id}`}
-                  className="group flex h-full flex-col rounded-[1.75rem] border border-outline-variant bg-surface-container-lowest p-6 shadow-[0_12px_34px_rgba(58,48,42,0.05)] transition-all hover:-translate-y-1 hover:border-primary/35"
+                  className="group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-outline-variant bg-surface-container-lowest shadow-[0_12px_34px_rgba(58,48,42,0.05)] transition-all hover:-translate-y-1 hover:border-primary/35"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 text-primary">
-                      {company.logoUrl ? (
-                        <Image
-                          src={company.logoUrl}
-                          alt={company.companyName}
-                          width={56}
-                          height={56}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-sm font-semibold">
-                          {getCompanyInitials(company.companyName)}
-                        </span>
-                      )}
+                  <div className="border-b border-outline-variant/70 p-6 pb-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 text-primary">
+                        {company.logoUrl ? (
+                          <Image
+                            src={company.logoUrl}
+                            alt={company.companyName}
+                            width={56}
+                            height={56}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-sm font-semibold">
+                            {getCompanyInitials(company.companyName)}
+                          </span>
+                        )}
+                      </div>
+
+                      <span className="rounded-full border border-outline-variant bg-surface px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.26em] text-primary">
+                        {company.industry}
+                      </span>
                     </div>
 
-                    <span className="rounded-full border border-outline-variant bg-surface px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.26em] text-primary">
-                      {company.industry}
-                    </span>
+                    <h2 className="mt-6 text-2xl tracking-tight text-on-surface">
+                      {company.companyName}
+                    </h2>
+                    <p className="mt-3 line-clamp-3 text-sm leading-7 text-on-surface-variant">
+                      {company.summary}
+                    </p>
                   </div>
 
-                  <h2 className="mt-6 text-2xl tracking-tight text-on-surface">
-                    {company.companyName}
-                  </h2>
-                  <p className="mt-3 text-sm leading-7 text-on-surface-variant">
-                    {company.summary}
-                  </p>
-
-                  <div className="mt-6 space-y-3 rounded-[1.25rem] border border-outline-variant bg-surface p-4 text-sm text-on-surface-variant">
-                    <div className="flex items-center justify-between gap-3">
-                      <span>Location</span>
-                      <span className="font-semibold text-on-surface">
+                  <div className="grid gap-3 border-b border-outline-variant/70 p-6 text-sm text-on-surface-variant sm:grid-cols-2">
+                    <div className="rounded-[1rem] border border-outline-variant bg-surface p-4">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-primary">
+                        Location
+                      </p>
+                      <p className="mt-2 font-semibold text-on-surface">
                         {company.location}
-                      </span>
+                      </p>
                     </div>
-                    <div className="flex items-center justify-between gap-3">
-                      <span>Open jobs</span>
-                      <span className="font-semibold text-on-surface">
+                    <div className="rounded-[1rem] border border-outline-variant bg-surface p-4">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-primary">
+                        Open jobs
+                      </p>
+                      <p className="mt-2 font-semibold text-on-surface">
                         {company.jobsCount}
-                      </span>
+                      </p>
                     </div>
-                    <div className="flex items-center justify-between gap-3">
-                      <span>Hiring focus</span>
-                      <span className="font-semibold text-on-surface">
+                    <div className="rounded-[1rem] border border-outline-variant bg-surface p-4 sm:col-span-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-primary">
+                        Hiring focus
+                      </p>
+                      <p className="mt-2 font-semibold text-on-surface">
                         {company.teamFocus}
-                      </span>
+                      </p>
                     </div>
                   </div>
 
-                  <div className="mt-6 flex items-center justify-between border-t border-outline-variant pt-4 text-xs font-semibold uppercase tracking-[0.24em] text-primary">
-                    <span>View details</span>
+                  <div className="flex items-center justify-between gap-3 p-6 text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+                    <span>Open company page</span>
                     <MaterialSymbol
                       icon="arrow_forward"
                       className="text-[16px] transition-transform group-hover:translate-x-1"

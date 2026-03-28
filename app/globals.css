@@ -153,3 +153,13 @@
     font-family: var(--font-serif), serif;
   }
 }
+
+@layer utilities {
+  .admin-match-orb {
+    background-image: radial-gradient(
+      circle at center,
+      rgba(194, 101, 42, 0.08),
+      transparent 65%
+    );
+  }
+}

@@ -15,6 +15,12 @@ function toString(value: unknown, fallback = "") {
     : fallback;
 }
 
+function toNullableString(value: unknown) {
+  const stringValue = toString(value, "");
+
+  return stringValue.length > 0 ? stringValue : null;
+}
+
 function formatCompany(employer: {
   id: string;
   companyName: string | null;
@@ -91,6 +97,8 @@ export async function GET(request: Request) {
         { status: 404 },
       );
     }
+
+    const reviewData = asRecord(seeker.user.jobSeekerOnboarding?.reviewData);
 
     const [
       applications,
@@ -245,6 +253,7 @@ export async function GET(request: Request) {
           seeker.user.jobSeekerOnboarding?.status ?? "IN_PROGRESS",
         verificationStatus:
           seeker.user.jobSeekerOnboarding?.verificationStatus ?? "PENDING",
+        rejectionReason: toNullableString(reviewData.rejectionReason),
       },
       recentApplications,
       recentMatches,

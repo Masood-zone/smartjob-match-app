@@ -8,6 +8,15 @@ export interface AdminDashboardStats {
   activeEmployers: number;
 }
 
+export interface AdminDashboardLiveMatch {
+  score: number;
+  matchType: string;
+  jobTitle: string;
+  companyName: string;
+  seekerName: string;
+  updatedAt: string;
+}
+
 export interface AdminDashboardAnalytics {
   months: string[];
   seekerSeries: number[];
@@ -29,6 +38,7 @@ export interface AdminDashboardResponse {
   stats: AdminDashboardStats;
   analytics: AdminDashboardAnalytics;
   recentActivity: AdminRecentActivity[];
+  realTimeMatch: AdminDashboardLiveMatch | null;
 }
 
 export interface AdminJobSeekerOnboardingDetails {

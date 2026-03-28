@@ -257,46 +257,48 @@ export function JobSeekerDashboardPage() {
             </section>
           ) : null}
 
-          {priorityApplication && priorityMeta ? (
-            <section className="rounded-[1.75rem] border border-primary/20 bg-primary/5 p-6 shadow-[0_12px_34px_rgba(58,48,42,0.05)] sm:p-8">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                <div className="space-y-4">
-                  <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-primary">
-                    <MaterialSymbol
-                      icon={priorityMeta.icon}
-                      className="text-[16px]"
-                    />
-                    Priority update
+          {priorityMeta && priorityApplication ? (
+            <>
+              <section className="rounded-[1.75rem] border border-primary/20 bg-primary/5 p-6 shadow-[0_12px_34px_rgba(58,48,42,0.05)] sm:p-8">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="space-y-4">
+                    <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-primary">
+                      <MaterialSymbol
+                        icon={priorityMeta.icon}
+                        className="text-[16px]"
+                      />
+                      Priority update
+                    </div>
+                    <div>
+                      <h2 className="text-2xl tracking-tight text-on-surface">
+                        {priorityMeta.label}
+                      </h2>
+                      <p className="mt-3 max-w-3xl text-sm leading-7 text-on-surface-variant sm:text-base">
+                        {priorityMeta.description}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-2xl tracking-tight text-on-surface">
-                      {priorityMeta.label}
-                    </h2>
-                    <p className="mt-3 max-w-3xl text-sm leading-7 text-on-surface-variant sm:text-base">
-                      {priorityMeta.description}
-                    </p>
-                  </div>
-                </div>
 
-                <div className="flex flex-col gap-3 lg:items-end">
-                  <span
-                    className={`inline-flex rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] ${priorityMeta.tone}`}
-                  >
-                    {priorityApplication.status}
-                  </span>
-                  <Link
-                    href={`/onboarding/job-seeker/dashboard/applications/${priorityApplication.id}`}
-                    className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-primary-foreground"
-                  >
-                    Open application
-                    <MaterialSymbol
-                      icon="arrow_forward"
-                      className="text-[16px]"
-                    />
-                  </Link>
+                  <div className="flex flex-col gap-3 lg:items-end">
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] ${priorityMeta.tone}`}
+                    >
+                      {priorityApplication.status}
+                    </span>
+                    <Link
+                      href={`/onboarding/job-seeker/dashboard/applications/${priorityApplication.id}`}
+                      className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-primary-foreground"
+                    >
+                      Open application
+                      <MaterialSymbol
+                        icon="arrow_forward"
+                        className="text-[16px]"
+                      />
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            </>
           ) : null}
 
           <section className="grid gap-6 md:grid-cols-3">

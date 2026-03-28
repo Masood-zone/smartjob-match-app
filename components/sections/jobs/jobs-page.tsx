@@ -159,7 +159,7 @@ export function JobsPage() {
                     <button
                       type="button"
                       onClick={() => applyMutation.mutate(job.id)}
-                      className="inline-flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                      className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                     >
                       Apply now
                       <MaterialSymbol icon="send" className="text-[14px]" />

@@ -66,6 +66,75 @@ export function DashboardView() {
         </div>
       </section> */}
 
+      {data.realTimeMatch ? (
+        <section className="overflow-hidden rounded-3xl border border-primary/20 bg-primary/5 p-6 shadow-sm sm:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-3xl space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary">
+                Real-time score
+              </p>
+              <h2 className="text-3xl tracking-tight text-on-surface sm:text-4xl">
+                Latest match signal from the live marketplace
+              </h2>
+              <p className="max-w-2xl text-sm leading-7 text-on-surface-variant sm:text-base">
+                {data.realTimeMatch.seekerName} matched with{" "}
+                {data.realTimeMatch.companyName} for{" "}
+                {data.realTimeMatch.jobTitle}. The latest score is pulled
+                directly from the most recent generated match.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-5 rounded-[1.75rem] border border-primary/20 bg-surface p-5 shadow-sm">
+              <div className="admin-match-orb relative flex h-24 w-24 items-center justify-center rounded-full">
+                <svg className="h-full w-full -rotate-90" viewBox="0 0 120 120">
+                  <circle
+                    className="text-border/70"
+                    cx="60"
+                    cy="60"
+                    fill="transparent"
+                    r="46"
+                    stroke="currentColor"
+                    strokeWidth="10"
+                  />
+                  <circle
+                    className="text-[#c2652a]"
+                    cx="60"
+                    cy="60"
+                    fill="transparent"
+                    r="46"
+                    stroke="currentColor"
+                    strokeDasharray="289"
+                    strokeDashoffset={
+                      289 - (289 * data.realTimeMatch.score) / 100
+                    }
+                    strokeLinecap="round"
+                    strokeWidth="10"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <span className="text-3xl text-on-surface">
+                    {data.realTimeMatch.score.toFixed(0)}%
+                  </span>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant">
+                    Live score
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+                  {data.realTimeMatch.matchType}
+                </p>
+                <p className="text-sm text-on-surface-variant">
+                  Updated{" "}
+                  {new Date(data.realTimeMatch.updatedAt).toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <DashboardCards stats={data.stats} />
       <AnalyticsCharts data={data.analytics} />
 

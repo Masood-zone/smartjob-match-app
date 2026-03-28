@@ -27,6 +27,8 @@ export function JobSeekerDashboardPage() {
     ]),
   );
 
+  const rejectedReason = data?.seeker.rejectionReason?.trim() || null;
+
   return (
     <JobSeekerPortalShell
       activeSection="dashboard"
@@ -216,11 +218,17 @@ export function JobSeekerDashboardPage() {
                             </Link>
                             <button
                               type="button"
-                              disabled={Boolean(application)}
+                              disabled={
+                                applyMutation.isPending || Boolean(application)
+                              }
                               onClick={() => applyMutation.mutate(match.jobId)}
                               className="inline-flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground disabled:cursor-not-allowed disabled:border-outline-variant disabled:text-on-surface-variant"
                             >
-                              {application ? application.status : "Apply"}
+                              {applyMutation.isPending
+                                ? "Applying..."
+                                : application
+                                  ? application.status
+                                  : "Apply"}
                             </button>
                           </div>
                         </article>
@@ -766,11 +774,11 @@ export function JobSeekerMatchesPage() {
                               </span>
                             </div>
                             <div className="h-2 rounded-full bg-stone-100">
-                              <div
-                                className="h-full rounded-full bg-primary"
-                                style={{
-                                  width: `${Math.min(100, match.score)}%`,
-                                }}
+                              <progress
+                                value={Math.min(100, match.score)}
+                                max={100}
+                                aria-label="Match score progress"
+                                className="match-progress h-2 w-full overflow-hidden rounded-full bg-stone-100 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-stone-100 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-primary [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-primary"
                               />
                             </div>
                           </div>
@@ -1301,9 +1309,11 @@ function MetricBar({
         <span className="text-on-surface">{value}</span>
       </div>
       <div className="h-2 rounded-full bg-stone-100">
-        <div
-          className="h-full rounded-full bg-primary transition-all"
-          style={{ width: `${percentage}%` }}
+        <progress
+          value={percentage}
+          max={100}
+          aria-label={`${label} progress`}
+          className="match-progress h-2 w-full overflow-hidden rounded-full bg-stone-100 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-stone-100 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-primary [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-primary"
         />
       </div>
     </div>

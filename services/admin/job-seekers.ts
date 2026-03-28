@@ -24,11 +24,12 @@ async function fetchAdminJobSeekers() {
 async function updateAdminJobSeekerStatus(input: {
   id: string;
   status: AdminVerificationStatus;
+  reason?: string;
 }) {
   try {
     const response = await api.patch<{ ok: boolean }>(
       `/api/admin/job-seekers/${input.id}`,
-      { status: input.status },
+      { status: input.status, reason: input.reason },
     );
 
     return response.data;

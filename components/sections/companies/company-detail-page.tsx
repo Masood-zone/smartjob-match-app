@@ -213,10 +213,13 @@ export function CompanyDetailPage({ companyId }: { companyId: string }) {
                         </span>
                         <button
                           type="button"
+                          disabled={applyMutation.isPending}
                           onClick={() => applyMutation.mutate(job.id)}
-                          className="inline-flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                          className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground disabled:cursor-not-allowed disabled:border-outline-variant disabled:text-on-surface-variant"
                         >
-                          Apply now
+                          {applyMutation.isPending
+                            ? "Applying..."
+                            : "Apply now"}
                           <MaterialSymbol icon="send" className="text-[14px]" />
                         </button>
                       </div>

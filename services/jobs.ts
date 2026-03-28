@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { useSession } from "@/lib/auth-client";
 import { api, getAxiosErrorMessage } from "@/services/api/axios";
 
 import { companiesQueryKey } from "./companies";
@@ -110,6 +111,12 @@ export interface JobApplicantsSummary {
 
 export const jobsQueryKey = ["jobs"] as const;
 
+function useAuthScope() {
+  const { data: session } = useSession();
+
+  return session?.user?.id ? `user:${session.user.id}` : "anonymous";
+}
+
 async function fetchJobs(params?: {
   employerId?: string;
   companyId?: string;
@@ -156,8 +163,10 @@ export function useJobsQuery(params?: {
   companyId?: string;
   query?: string;
 }) {
+  const authScope = useAuthScope();
+
   return useQuery({
-    queryKey: [...jobsQueryKey, params ?? "all"],
+    queryKey: [...jobsQueryKey, authScope, params ?? "all"],
     queryFn: () => fetchJobs(params),
     staleTime: 20_000,
   });

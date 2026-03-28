@@ -182,10 +182,13 @@ export function JobsBrowserPage() {
                         </Link>
                         <button
                           type="button"
+                          disabled={applyMutation.isPending}
                           onClick={() => applyMutation.mutate(job.id)}
-                          className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-primary-foreground transition-opacity hover:opacity-90"
+                          className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          Apply now
+                          {applyMutation.isPending
+                            ? "Applying..."
+                            : "Apply now"}
                           <MaterialSymbol icon="send" className="text-[14px]" />
                         </button>
                       </div>

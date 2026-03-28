@@ -24,11 +24,12 @@ async function fetchAdminEmployers() {
 async function updateAdminEmployerStatus(input: {
   id: string;
   status: AdminVerificationStatus;
+  reason?: string;
 }) {
   try {
     const response = await api.patch<{ ok: boolean }>(
       `/api/admin/employers/${input.id}`,
-      { status: input.status },
+      { status: input.status, reason: input.reason },
     );
 
     return response.data;

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { OnboardingStatus, VerificationStatus } from "@prisma/client";
+import { OnboardingStatus, Prisma, VerificationStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import {
@@ -7,6 +7,12 @@ import {
   rebuildMatchesForSeeker,
 } from "@/lib/matching/sync";
 import { notificationsService } from "@/lib/notifications";
+
+function asRecord(value: unknown) {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
 
 const allowedStatuses = new Set<VerificationStatus>([
   "PENDING",
@@ -20,7 +26,7 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const body = (await request.json()) as { status?: string };
+    const body = (await request.json()) as { status?: string; reason?: string };
 
     if (!allowedStatuses.has(body.status as VerificationStatus)) {
       return NextResponse.json(
@@ -51,6 +57,24 @@ export async function PATCH(
     }
 
     const verificationStatus = body.status as VerificationStatus;
+    const rejectionReason =
+      typeof body.reason === "string" ? body.reason.trim() : "";
+
+    const existingOnboarding = await prisma.jobSeekerOnboarding.findUnique({
+      where: { userId: seeker.userId },
+      select: { reviewData: true },
+    });
+
+    const reviewData =
+      verificationStatus === "REJECTED"
+        ? {
+            ...asRecord(existingOnboarding?.reviewData),
+            rejectionReason:
+              rejectionReason || "The reviewer requested profile updates.",
+            rejectionAt: new Date().toISOString(),
+          }
+        : asRecord(existingOnboarding?.reviewData);
+    const reviewDataJson = reviewData as Prisma.InputJsonValue;
 
     const onboarding = await prisma.jobSeekerOnboarding.upsert({
       where: { userId: seeker.userId },
@@ -64,6 +88,7 @@ export async function PATCH(
             : OnboardingStatus.IN_PROGRESS,
         verificationStatus,
         completedAt: verificationStatus === "APPROVED" ? new Date() : undefined,
+        reviewData: reviewDataJson,
       },
       update: {
         verificationStatus,
@@ -72,6 +97,7 @@ export async function PATCH(
             ? OnboardingStatus.COMPLETED
             : OnboardingStatus.IN_PROGRESS,
         completedAt: verificationStatus === "APPROVED" ? new Date() : undefined,
+        reviewData: reviewDataJson,
       },
     });
 
@@ -80,6 +106,7 @@ export async function PATCH(
         email: seeker.user.email,
         name: seeker.user.name,
         approved: verificationStatus === "APPROVED",
+        reason: rejectionReason,
       });
     } catch (error) {
       console.error("Failed to send job seeker decision email:", error);

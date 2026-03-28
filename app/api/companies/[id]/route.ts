@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import { getRequestSessionUser } from "@/lib/request-session";
 
 function asRecord(value: unknown) {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -19,6 +20,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const sessionUser = await getRequestSessionUser(request);
     const { id } = await params;
 
     const company = await prisma.employer.findUnique({
@@ -83,6 +85,29 @@ export async function GET(
       company.user.employerOnboarding?.verificationData,
     );
     const reviewData = asRecord(company.user.employerOnboarding?.reviewData);
+    const seeker =
+      sessionUser?.role === "JOB_SEEKER"
+        ? await prisma.jobSeeker.findUnique({
+            where: { userId: sessionUser.id },
+            select: { id: true },
+          })
+        : null;
+    const seekerMatches = seeker
+      ? await prisma.match.findMany({
+          where: {
+            seekerId: seeker.id,
+            jobId: { in: company.jobs.map((job) => job.id) },
+          },
+          select: {
+            jobId: true,
+            score: true,
+            matchType: true,
+          },
+        })
+      : [];
+    const seekerMatchMap = new Map(
+      seekerMatches.map((match) => [match.jobId, match]),
+    );
 
     const data = {
       id: company.id,
@@ -141,13 +166,17 @@ export async function GET(
         requiredSkills: job.requiredSkills,
         applicationsCount: job.applications.length,
         matchesCount: job.matches.length,
-        topMatchScore: job.matches.reduce(
-          (highest, match) => Math.max(highest, match.score),
-          0,
-        ),
+        topMatchScore:
+          seekerMatchMap.get(job.id)?.score ??
+          job.matches.reduce(
+            (highest, match) => Math.max(highest, match.score),
+            0,
+          ),
         topMatchType:
-          job.matches.sort((left, right) => right.score - left.score)[0]
-            ?.matchType ?? null,
+          seekerMatchMap.get(job.id)?.matchType ??
+          [...job.matches].sort((left, right) => right.score - left.score)[0]
+            ?.matchType ??
+          null,
         createdAt: job.createdAt.toISOString(),
       })),
       createdAt: company.user.createdAt.toISOString(),

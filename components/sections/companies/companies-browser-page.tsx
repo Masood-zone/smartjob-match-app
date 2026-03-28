@@ -295,7 +295,7 @@ function CompanyDetailsModal({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-on-surface/40 p-4 backdrop-blur-sm sm:p-6 lg:p-12">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-950/30 p-4 sm:p-6 lg:p-12">
       <button
         type="button"
         aria-label="Close company details"
@@ -303,19 +303,19 @@ function CompanyDetailsModal({
         onClick={onClose}
       />
 
-      <div className="relative mx-auto w-full max-w-5xl overflow-hidden rounded-[2rem] bg-surface-bright shadow-[0_24px_60px_rgba(53,38,31,0.22)]">
+      <div className="relative mx-auto w-full max-w-5xl overflow-hidden rounded-[2rem] border border-outline-variant bg-surface-container-lowest shadow-[0_24px_60px_rgba(53,38,31,0.22)]">
         <button
           type="button"
           aria-label="Close company details"
           title="Close company details"
           onClick={onClose}
-          className="absolute right-4 top-4 z-20 rounded-full bg-black/20 p-2 text-white transition-colors hover:bg-black/40"
+          className="absolute right-4 top-4 z-20 rounded-full border border-outline-variant bg-surface/95 p-2 text-on-surface transition-colors hover:border-primary hover:text-primary"
         >
           <MaterialSymbol icon="close" className="text-[20px]" />
         </button>
 
         {loading ? (
-          <div className="h-128 animate-pulse bg-surface-container-low" />
+          <div className="h-128 animate-pulse bg-surface-container-lowest" />
         ) : error ? (
           <div className="p-8">
             <div className="rounded-[1.5rem] border border-rose-200 bg-rose-50 p-6 text-rose-700">
@@ -334,65 +334,64 @@ function CompanyDetailsModal({
           </div>
         ) : data ? (
           <>
-            <div className="relative h-64 w-full md:h-96">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(194,101,42,0.32),transparent_38%),linear-gradient(135deg,#211915_0%,#4a3225_48%,#a85b2d_100%)]" />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,250,244,0.06),rgba(58,48,42,0.68))]" />
+            <section className="border-b border-outline-variant bg-surface-container-lowest p-6 md:p-8">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                <div className="flex min-w-0 gap-5">
+                  <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-[1.5rem] border border-outline-variant bg-surface text-primary shadow-sm">
+                    {data.logoUrl ? (
+                      <Image
+                        src={data.logoUrl}
+                        alt={data.companyName}
+                        width={96}
+                        height={96}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-3xl font-semibold">
+                        {getCompanyInitials(data.companyName)}
+                      </span>
+                    )}
+                  </div>
 
-              <div className="absolute bottom-0 left-0 flex w-full flex-col gap-6 p-6 md:flex-row md:items-end md:gap-8 md:p-8">
-                <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-[1.5rem] border border-white/30 bg-white text-primary shadow-[0_18px_40px_rgba(0,0,0,0.18)]">
-                  {data.logoUrl ? (
-                    <Image
-                      src={data.logoUrl}
-                      alt={data.companyName}
-                      width={96}
-                      height={96}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-3xl font-semibold">
-                      {getCompanyInitials(data.companyName)}
-                    </span>
-                  )}
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary">
+                      {data.industry}
+                    </p>
+                    <h2 className="mt-2 text-4xl tracking-tight text-on-surface md:text-5xl">
+                      {data.companyName}
+                    </h2>
+                    <p className="mt-3 max-w-3xl text-sm leading-7 text-on-surface-variant md:text-base">
+                      {truncateText(data.summary, 220)}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex-1 text-white">
-                  <h2 className="text-4xl tracking-tight md:text-5xl">
-                    {data.companyName}
-                  </h2>
-                  <p className="mt-2 text-xs uppercase tracking-[0.28em] text-white/80">
-                    {data.industry}
-                  </p>
-                  <p className="mt-3 max-w-3xl text-sm leading-7 text-white/90 md:text-base">
-                    {data.summary}
-                  </p>
-                </div>
-
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <Link
                     href={`/companies/${companyId}`}
-                    className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-primary-foreground"
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-outline-variant bg-surface px-5 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-on-surface-variant transition-colors hover:border-primary hover:text-primary"
                   >
                     Open page
                   </Link>
                   <button
                     type="button"
                     onClick={onClose}
-                    className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-white backdrop-blur-sm"
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-primary px-4 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-primary-foreground transition-colors hover:bg-primary/90"
                   >
                     Close
                   </button>
                 </div>
               </div>
-            </div>
+            </section>
 
-            <div className="grid gap-0 lg:grid-cols-3">
-              <div className="space-y-8 p-6 md:p-8 lg:col-span-2">
+            <div className="grid gap-0 lg:grid-cols-[minmax(0,1.15fr)_360px]">
+              <div className="space-y-8 p-6 md:p-8">
                 <section>
-                  <h3 className="text-3xl tracking-tight text-on-surface">
+                  <h3 className="text-2xl tracking-tight text-on-surface">
                     About the company
                   </h3>
                   <p className="mt-4 max-w-3xl text-sm leading-7 text-on-surface-variant md:text-base">
-                    {data.summary}
+                    {truncateText(data.summary, 260)}
                   </p>
                 </section>
 
@@ -431,8 +430,8 @@ function CompanyDetailsModal({
                           </span>
                         </div>
 
-                        <p className="mt-4 text-sm leading-7 text-on-surface-variant">
-                          {truncateText(job.description, 200)}
+                        <p className="mt-4 line-clamp-3 text-sm leading-7 text-on-surface-variant">
+                          {truncateText(job.description, 180)}
                         </p>
 
                         <div className="mt-4 flex flex-wrap gap-2">
@@ -453,7 +452,7 @@ function CompanyDetailsModal({
                           <button
                             type="button"
                             onClick={() => applyMutation.mutate(job.id)}
-                            className="inline-flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                            className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                           >
                             Apply now
                             <MaterialSymbol
@@ -508,13 +507,13 @@ function CompanyDetailsModal({
                   <div className="mt-4 space-y-3">
                     <Link
                       href={`/companies/${companyId}`}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-outline-variant bg-surface px-4 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-on-surface-variant transition-colors hover:border-primary hover:text-primary"
+                      className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-outline-variant bg-surface px-4 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-on-surface-variant transition-colors hover:border-primary hover:text-primary"
                     >
                       View company page
                     </Link>
                     <Link
                       href="/jobs"
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-primary-foreground"
+                      className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-4 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-primary-foreground"
                     >
                       Explore jobs
                     </Link>

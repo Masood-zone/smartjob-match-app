@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
+import { useSession } from "@/lib/auth-client";
 import { api, getAxiosErrorMessage } from "@/services/api/axios";
 
 export interface CompanySummary {
@@ -45,6 +46,12 @@ export interface CompanyDetails extends CompanySummary {
 
 export const companiesQueryKey = ["companies"] as const;
 
+function useAuthScope() {
+  const { data: session } = useSession();
+
+  return session?.user?.id ? `user:${session.user.id}` : "anonymous";
+}
+
 async function fetchCompanies(search?: string) {
   try {
     const response = await api.get<{ data: CompanySummary[] }>(
@@ -73,16 +80,20 @@ async function fetchCompany(companyId: string) {
 }
 
 export function useCompaniesQuery(search?: string) {
+  const authScope = useAuthScope();
+
   return useQuery({
-    queryKey: [...companiesQueryKey, search ?? "all"],
+    queryKey: [...companiesQueryKey, authScope, search ?? "all"],
     queryFn: () => fetchCompanies(search),
     staleTime: 30_000,
   });
 }
 
 export function useCompanyQuery(companyId: string) {
+  const authScope = useAuthScope();
+
   return useQuery({
-    queryKey: [...companiesQueryKey, companyId],
+    queryKey: [...companiesQueryKey, authScope, companyId],
     queryFn: () => fetchCompany(companyId),
     staleTime: 30_000,
     enabled: Boolean(companyId),

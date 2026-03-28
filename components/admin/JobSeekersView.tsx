@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
+import { RejectionReasonModal } from "./RejectionReasonModal";
 import { StatusBadge } from "./StatusBadge";
 
 import { cn, formatDate, getInitials } from "@/lib/utils";
@@ -27,6 +28,8 @@ export function JobSeekersView() {
   const [filter, setFilter] = useState<FilterValue>("ALL");
   const [search, setSearch] = useState("");
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
+  const [rejectionTarget, setRejectionTarget] =
+    useState<AdminJobSeekerRecord | null>(null);
 
   const filteredRecords = useMemo(() => {
     return records.filter((record) => {
@@ -66,6 +69,10 @@ export function JobSeekersView() {
   const pendingCount = records.filter(
     (record) => record.status === "PENDING",
   ).length;
+
+  const selectedRejectionReason = getRejectionReason(
+    selectedRecord?.onboarding?.reviewData ?? null,
+  );
 
   if (isLoading) {
     return (
@@ -404,34 +411,51 @@ export function JobSeekersView() {
                 </p>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateStatusMutation.mutate({
-                      id: selectedRecord.id,
-                      status: "REJECTED",
-                    })
-                  }
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 transition-colors hover:bg-rose-100"
-                >
-                  <MaterialSymbol icon="cancel" className="text-[18px]" />
-                  Reject
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateStatusMutation.mutate({
-                      id: selectedRecord.id,
-                      status: "APPROVED",
-                    })
-                  }
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#c2652a] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#a9531c]"
-                >
-                  <MaterialSymbol icon="check_circle" className="text-[18px]" />
-                  Approve
-                </button>
-              </div>
+              {selectedRecord.status === "PENDING" ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    disabled={updateStatusMutation.isPending}
+                    onClick={() =>
+                      updateStatusMutation.mutate({
+                        id: selectedRecord.id,
+                        status: "APPROVED",
+                      })
+                    }
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#c2652a] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#a9531c] disabled:cursor-not-allowed disabled:bg-[#c2652a]/60"
+                  >
+                    <MaterialSymbol
+                      icon="check_circle"
+                      className="text-[18px]"
+                    />
+                    {updateStatusMutation.isPending ? "Updating..." : "Approve"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={updateStatusMutation.isPending}
+                    onClick={() => setRejectionTarget(selectedRecord)}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 transition-colors hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <MaterialSymbol icon="cancel" className="text-[18px]" />
+                    Reject
+                  </button>
+                </div>
+              ) : (
+                <div className="rounded-[1.5rem] border border-border/70 bg-background/80 p-4 text-sm text-on-surface-variant">
+                  This profile has already been reviewed. Approval buttons are
+                  hidden after a decision is recorded.
+                </div>
+              )}
+
+              {selectedRecord.status === "REJECTED" &&
+              selectedRejectionReason ? (
+                <div className="rounded-[1.5rem] border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-rose-600">
+                    Rejection reason
+                  </p>
+                  <p className="mt-2 leading-7">{selectedRejectionReason}</p>
+                </div>
+              ) : null}
             </>
           ) : (
             <div className="flex h-full min-h-112 flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-border/70 bg-background/60 p-8 text-center text-on-surface-variant">
@@ -450,6 +474,34 @@ export function JobSeekersView() {
           )}
         </aside>
       </div>
+
+      <RejectionReasonModal
+        open={Boolean(rejectionTarget)}
+        title="Reject job seeker"
+        description="Add a clear reason so the seeker knows what to update before they resubmit their profile."
+        submitLabel="Reject profile"
+        onOpenChange={(open) => {
+          if (!open) {
+            setRejectionTarget(null);
+          }
+        }}
+        onSubmit={(reason) => {
+          if (!rejectionTarget) {
+            return;
+          }
+
+          updateStatusMutation.mutate(
+            {
+              id: rejectionTarget.id,
+              status: "REJECTED",
+              reason,
+            },
+            {
+              onSuccess: () => setRejectionTarget(null),
+            },
+          );
+        }}
+      />
     </div>
   );
 }
@@ -480,4 +532,18 @@ function buildExperienceEntries(record: AdminJobSeekerRecord) {
           : "",
     };
   });
+}
+
+function getRejectionReason(
+  reviewData: Record<string, unknown> | null | undefined,
+) {
+  if (!reviewData) {
+    return null;
+  }
+
+  const reason = reviewData.rejectionReason;
+
+  return typeof reason === "string" && reason.trim().length > 0
+    ? reason.trim()
+    : null;
 }

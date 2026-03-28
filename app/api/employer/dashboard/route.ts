@@ -15,6 +15,12 @@ function toString(value: unknown, fallback = "") {
     : fallback;
 }
 
+function toNullableString(value: unknown) {
+  const stringValue = toString(value, "");
+
+  return stringValue.length > 0 ? stringValue : null;
+}
+
 function toDateString(value: unknown) {
   return typeof value === "string" && value.trim().length > 0
     ? value.trim()
@@ -116,6 +122,7 @@ export async function GET(request: Request) {
                 verificationStatus: true,
                 basicInfoData: true,
                 teamSetupData: true,
+                reviewData: true,
               },
             },
           },
@@ -129,6 +136,8 @@ export async function GET(request: Request) {
         { status: 404 },
       );
     }
+
+    const reviewData = asRecord(employer.user.employerOnboarding?.reviewData);
 
     const [jobs, totalApplications, totalMatches, totalInterviews] =
       await Promise.all([
@@ -276,6 +285,7 @@ export async function GET(request: Request) {
 
     const data = {
       employer: formatCompany(employer),
+      rejectionReason: toNullableString(reviewData.rejectionReason),
       stats: {
         totalJobs: jobs.length,
         totalApplications,

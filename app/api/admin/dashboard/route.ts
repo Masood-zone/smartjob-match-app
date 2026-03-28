@@ -45,6 +45,7 @@ export async function GET() {
       recentJobs,
       recentJobSeekerReviews,
       recentEmployerReviews,
+      latestMatch,
     ] = await Promise.all([
       prisma.user.findMany({
         select: { role: true, createdAt: true },
@@ -80,6 +81,30 @@ export async function GET() {
         take: 2,
         include: {
           user: { select: { name: true, email: true } },
+        },
+      }),
+      prisma.match.findFirst({
+        orderBy: { createdAt: "desc" },
+        select: {
+          score: true,
+          matchType: true,
+          createdAt: true,
+          job: {
+            select: {
+              title: true,
+              employer: {
+                select: {
+                  companyName: true,
+                  user: { select: { name: true } },
+                },
+              },
+            },
+          },
+          jobSeeker: {
+            select: {
+              user: { select: { name: true } },
+            },
+          },
         },
       }),
     ]);
@@ -179,6 +204,19 @@ export async function GET() {
             : 0,
       },
       recentActivity,
+      realTimeMatch: latestMatch
+        ? {
+            score: latestMatch.score,
+            matchType: latestMatch.matchType,
+            jobTitle: latestMatch.job.title,
+            companyName:
+              latestMatch.job.employer.companyName ||
+              latestMatch.job.employer.user.name ||
+              "Unnamed company",
+            seekerName: latestMatch.jobSeeker.user.name || "Unnamed seeker",
+            updatedAt: latestMatch.createdAt.toISOString(),
+          }
+        : null,
     });
   } catch (error) {
     const message =

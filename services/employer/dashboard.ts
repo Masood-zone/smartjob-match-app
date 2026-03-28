@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
+import { useSession } from "@/lib/auth-client";
 import { api, getAxiosErrorMessage } from "@/services/api/axios";
 
 export interface EmployerDashboardJob {
@@ -74,6 +75,7 @@ export interface EmployerDashboardResponse {
     teamFocus: string;
     verificationStatus: string;
     onboardingStatus: string;
+    rejectionReason: string | null;
   };
   stats: {
     totalJobs: number;
@@ -88,6 +90,12 @@ export interface EmployerDashboardResponse {
 
 export const employerDashboardQueryKey = ["employer", "dashboard"] as const;
 
+function useAuthScope() {
+  const { data: session } = useSession();
+
+  return session?.user?.id ? `user:${session.user.id}` : "anonymous";
+}
+
 async function fetchEmployerDashboard() {
   try {
     const response = await api.get<{ data: EmployerDashboardResponse }>(
@@ -101,9 +109,12 @@ async function fetchEmployerDashboard() {
 }
 
 export function useEmployerDashboardQuery() {
+  const authScope = useAuthScope();
+
   return useQuery({
-    queryKey: employerDashboardQueryKey,
+    queryKey: [...employerDashboardQueryKey, authScope],
     queryFn: fetchEmployerDashboard,
     staleTime: 30_000,
+    enabled: authScope !== "anonymous",
   });
 }

@@ -92,6 +92,7 @@ async function getCurrentEmployer(userId: string) {
 
 export async function GET(request: Request) {
   try {
+    const sessionUser = await getRequestSessionUser(request);
     const searchParams = new URL(request.url).searchParams;
     const employerId = searchParams.get("employerId")?.trim() || undefined;
     const companyId = searchParams.get("companyId")?.trim() || undefined;
@@ -149,9 +150,39 @@ export async function GET(request: Request) {
       },
     });
 
+    const seeker =
+      sessionUser?.role === "JOB_SEEKER"
+        ? await prisma.jobSeeker.findUnique({
+            where: { userId: sessionUser.id },
+            select: { id: true },
+          })
+        : null;
+
+    const seekerMatchMap = seeker
+      ? new Map(
+          (
+            await prisma.match.findMany({
+              where: {
+                seekerId: seeker.id,
+                jobId: { in: jobs.map((job) => job.id) },
+              },
+              select: {
+                jobId: true,
+                score: true,
+                matchType: true,
+              },
+            })
+          ).map((match) => [match.jobId, match]),
+        )
+      : null;
+
     const data = jobs
       .map((job) => {
         const company = formatEmployer(job.employer);
+        const sortedMatches = [...job.matches].sort(
+          (left, right) => right.score - left.score,
+        );
+        const seekerMatch = seekerMatchMap?.get(job.id);
 
         return {
           id: job.id,
@@ -168,13 +199,15 @@ export async function GET(request: Request) {
           companyLogoUrl: company.companyLogoUrl,
           applicationsCount: job.applications.length,
           matchesCount: job.matches.length,
-          topMatchScore: job.matches.reduce(
-            (highest, match) => Math.max(highest, match.score),
-            0,
-          ),
-          topMatchType:
-            job.matches.sort((left, right) => right.score - left.score)[0]
-              ?.matchType ?? null,
+          topMatchScore: seekerMatch
+            ? seekerMatch.score
+            : job.matches.reduce(
+                (highest, match) => Math.max(highest, match.score),
+                0,
+              ),
+          topMatchType: seekerMatch
+            ? seekerMatch.matchType
+            : (sortedMatches[0]?.matchType ?? null),
           createdAt: job.createdAt.toISOString(),
         };
       })

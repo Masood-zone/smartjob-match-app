@@ -20,6 +20,7 @@ interface RoleWelcomeEmailArgs extends WelcomeEmailArgs {
 interface VerificationDecisionEmailArgs extends WelcomeEmailArgs {
   approved: boolean;
   ctaUrl?: string;
+  reason?: string;
 }
 
 interface ApplicationReceivedEmailArgs {
@@ -387,6 +388,7 @@ class NotificationsService {
   ): Promise<void> {
     const appUrl = getAppUrl();
     const ctaUrl = args.ctaUrl || `${appUrl}/onboarding/job-seeker`;
+    const rejectionReason = args.reason?.trim();
 
     const content = buildDecisionEmailContent({
       approved: args.approved,
@@ -394,8 +396,9 @@ class NotificationsService {
       rejectedTitle: "Your job seeker profile needs a few updates",
       approvedLead:
         "Your profile is now approved. You can start exploring matched opportunities, apply to roles, and keep your profile current for stronger results.",
-      rejectedLead:
-        "Your profile was not approved yet. Review the details below, update any missing information, and resubmit once everything is complete.",
+      rejectedLead: rejectionReason
+        ? `Your profile was not approved yet. Review the details below, update any missing information, and resubmit once everything is complete. Reason from the reviewer: ${rejectionReason}`
+        : "Your profile was not approved yet. Review the details below, update any missing information, and resubmit once everything is complete.",
       approvedSteps: [
         {
           title: "Review your matched roles",
@@ -436,8 +439,9 @@ class NotificationsService {
       rejectedCtaUrl: ctaUrl,
       approvedCtaNote:
         "Keep your skills and experience up to date to improve future matching quality.",
-      rejectedCtaNote:
-        "After updating your profile, you can resubmit it for another review.",
+      rejectedCtaNote: rejectionReason
+        ? `Reviewer note: ${rejectionReason}. After updating your profile, you can resubmit it for another review.`
+        : "After updating your profile, you can resubmit it for another review.",
       approvedClosing:
         "We are ready to help you move from profile approval to active job search.",
       rejectedClosing:
@@ -465,6 +469,7 @@ class NotificationsService {
   ): Promise<void> {
     const appUrl = getAppUrl();
     const ctaUrl = args.ctaUrl || `${appUrl}/onboarding/employer`;
+    const rejectionReason = args.reason?.trim();
 
     const content = buildDecisionEmailContent({
       approved: args.approved,
@@ -472,8 +477,9 @@ class NotificationsService {
       rejectedTitle: "Your employer account needs a few updates",
       approvedLead:
         "Your company profile is now approved. You can start posting jobs, reviewing matched talent, and moving forward with hiring.",
-      rejectedLead:
-        "Your employer profile was not approved yet. Please review the missing details below, update the company information, and submit again.",
+      rejectedLead: rejectionReason
+        ? `Your employer profile was not approved yet. Please review the missing details below, update the company information, and submit again. Reason from the reviewer: ${rejectionReason}`
+        : "Your employer profile was not approved yet. Please review the missing details below, update the company information, and submit again.",
       approvedSteps: [
         {
           title: "Post your first job",
@@ -514,8 +520,9 @@ class NotificationsService {
       rejectedCtaUrl: ctaUrl,
       approvedCtaNote:
         "Posting strong job details early helps the matching system surface relevant talent faster.",
-      rejectedCtaNote:
-        "After updating your company details, submit the review form again.",
+      rejectedCtaNote: rejectionReason
+        ? `Reviewer note: ${rejectionReason}. After updating your company details, submit the review form again.`
+        : "After updating your company details, submit the review form again.",
       approvedClosing: "Your hiring workspace is ready whenever you are.",
       rejectedClosing:
         "Update the profile and the review team can take another look.",
