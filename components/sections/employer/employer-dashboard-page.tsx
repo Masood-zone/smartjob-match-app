@@ -2,8 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
+import { signOut } from "@/lib/auth-client";
 import { EmployerPortalShell } from "@/components/sections/employer/employer-portal-shell";
 import { useEmployerDashboardQuery } from "@/services/employer/dashboard";
 
@@ -24,6 +27,22 @@ function formatSkillList(skills: string[]) {
 export function EmployerDashboard() {
   const { data, isLoading, isError, error, refetch } =
     useEmployerDashboardQuery();
+  const router = useRouter();
+
+  const pendingApplicationsCount = useMemo(
+    () =>
+      data?.recentApplications.filter(
+        (application) => application.status === "PENDING",
+      ).length ?? 0,
+    [data?.recentApplications],
+  );
+
+  const handleLogout = () => {
+    void Promise.resolve(signOut()).finally(() => {
+      router.replace("/login");
+      router.refresh();
+    });
+  };
 
   return (
     <EmployerPortalShell
@@ -111,6 +130,50 @@ export function EmployerDashboard() {
               icon="event"
             />
           </section>
+
+          {pendingApplicationsCount > 0 ? (
+            <section className="overflow-hidden rounded-[2rem] border border-primary/20 bg-primary/5 p-6 shadow-[0_18px_50px_rgba(58,48,42,0.08)] sm:p-8">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                <div className="max-w-3xl space-y-3">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
+                    <MaterialSymbol
+                      icon="notifications_active"
+                      className="text-[16px]"
+                    />
+                    Pending review
+                  </div>
+                  <h2 className="text-3xl tracking-tight text-on-surface sm:text-4xl">
+                    You have {pendingApplicationsCount} applications waiting for
+                    review
+                  </h2>
+                  <p className="max-w-2xl text-sm leading-7 text-on-surface-variant sm:text-base">
+                    Open the applicant queue to shortlist talent, schedule the
+                    next step, or close roles that are not the right fit yet.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/onboarding/employer/applicants"
+                    className="inline-flex items-center gap-2 rounded-full bg-[#c2652a] px-5 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-white shadow-sm transition-colors hover:bg-[#a9531c]"
+                  >
+                    Go to applicants
+                    <MaterialSymbol
+                      icon="arrow_forward"
+                      className="text-[16px]"
+                    />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface px-5 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-on-surface-variant transition-colors hover:border-[#c2652a] hover:text-[#c2652a]"
+                  >
+                    Log out
+                  </button>
+                </div>
+              </div>
+            </section>
+          ) : null}
 
           <section className="grid gap-6 xl:grid-cols-[1fr_1.1fr]">
             <article className="rounded-[1.75rem] border border-outline-variant bg-surface p-6 shadow-[0_12px_34px_rgba(58,48,42,0.05)] sm:p-8">

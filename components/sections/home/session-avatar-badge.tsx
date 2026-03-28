@@ -53,6 +53,10 @@ function getRoleLabel(role?: SessionUser["role"]) {
     return "Job Seeker Account";
   }
 
+  if (role === "ADMIN") {
+    return "Admin Account";
+  }
+
   return "User";
 }
 
@@ -295,24 +299,28 @@ export function SessionAvatarBadge({
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push(dashboardHref)}>
-          <MaterialSymbol icon="dashboard" className="text-[16px]" />
+        <DropdownMenuItem
+          onClick={() => router.push(dashboardHref)}
+          className="cursor-pointer"
+        >
+          <MaterialSymbol icon="dashboard" className="text-[16px] " />
           Dashboard
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push("/onboarding")}>
-          <MaterialSymbol icon="route" className="text-[16px]" />
+        {/* <DropdownMenuItem onClick={() => router.push("/onboarding")}>
+          <MaterialSymbol icon="route" className="text-[16px] " />
           Onboarding hub
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.push("/resources")}>
-          <MaterialSymbol icon="help" className="text-[16px]" />
+          <MaterialSymbol icon="help" className="text-[16px] " />
           Help center
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => void handleLogout()}
           variant="destructive"
+          className="cursor-pointer"
         >
-          <MaterialSymbol icon="logout" className="text-[16px]" />
+          <MaterialSymbol icon="logout" className="text-[16px] " />
           Logout
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -40,7 +40,7 @@ export interface AdminJobSeekerOnboardingDetails {
   completedAt: string | null;
   updatedAt: string;
   identityData: Record<string, unknown> | null;
-  experienceData: Record<string, unknown> | null;
+  experienceData: Record<string, unknown>[] | null;
   qualificationData: Record<string, unknown> | null;
   reviewData: Record<string, unknown> | null;
 }

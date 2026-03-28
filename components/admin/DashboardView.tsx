@@ -42,7 +42,7 @@ export function DashboardView() {
 
   return (
     <div className="space-y-8">
-      <section className="flex flex-col gap-4 rounded-3xl border border-border/70 bg-surface p-6 shadow-sm lg:flex-row lg:items-end lg:justify-between">
+      {/* <section className="flex flex-col gap-4 rounded-3xl border border-border/70 bg-surface p-6 shadow-sm lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-2xl space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#c2652a]">
             Admin Dashboard
@@ -64,7 +64,7 @@ export function DashboardView() {
             Export report
           </div>
         </div>
-      </section>
+      </section> */}
 
       <DashboardCards stats={data.stats} />
       <AnalyticsCharts data={data.analytics} />

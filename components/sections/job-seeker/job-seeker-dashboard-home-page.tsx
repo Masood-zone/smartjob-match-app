@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
 import { useApplyToJobMutation } from "@/services/applications";
@@ -10,6 +11,7 @@ import {
   type JobSeekerDashboardRecentApplication,
   useJobSeekerDashboardQuery,
 } from "@/services/job-seeker/dashboard";
+import { signOut } from "@/lib/auth-client";
 
 import {
   getCompanyInitials,
@@ -153,6 +155,7 @@ export function JobSeekerDashboardPage() {
   const { data, isLoading, isError, error, refetch } =
     useJobSeekerDashboardQuery();
   const applyMutation = useApplyToJobMutation();
+  const router = useRouter();
 
   const appliedByJobId = new Map(
     data?.recentApplications.map((application) => [
@@ -160,6 +163,21 @@ export function JobSeekerDashboardPage() {
       application,
     ]),
   );
+
+  const pendingApplicationsCount = useMemo(
+    () =>
+      data?.recentApplications.filter(
+        (application) => application.status === "PENDING",
+      ).length ?? 0,
+    [data?.recentApplications],
+  );
+
+  const handleLogout = () => {
+    void Promise.resolve(signOut()).finally(() => {
+      router.replace("/login");
+      router.refresh();
+    });
+  };
 
   const priorityApplication =
     data?.recentApplications.find(
@@ -300,6 +318,51 @@ export function JobSeekerDashboardPage() {
               icon="notifications"
             />
           </section>
+
+          {pendingApplicationsCount > 0 ? (
+            <section className="overflow-hidden rounded-[2rem] border border-primary/20 bg-primary/5 p-6 shadow-[0_18px_50px_rgba(58,48,42,0.08)] sm:p-8">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                <div className="max-w-3xl space-y-3">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
+                    <MaterialSymbol
+                      icon="notifications_active"
+                      className="text-[16px]"
+                    />
+                    Pending review
+                  </div>
+                  <h2 className="text-3xl tracking-tight text-on-surface sm:text-4xl">
+                    {pendingApplicationsCount} applications are still under
+                    review
+                  </h2>
+                  <p className="max-w-2xl text-sm leading-7 text-on-surface-variant sm:text-base">
+                    Keep browsing the job listings while employers finish their
+                    review. Your application status will update automatically
+                    when they make a decision.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/jobs"
+                    className="inline-flex items-center gap-2 rounded-full bg-[#c2652a] px-5 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-white shadow-sm transition-colors hover:bg-[#a9531c]"
+                  >
+                    Go to job listings
+                    <MaterialSymbol
+                      icon="arrow_forward"
+                      className="text-[16px]"
+                    />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface px-5 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-on-surface-variant transition-colors hover:border-[#c2652a] hover:text-[#c2652a]"
+                  >
+                    Log out
+                  </button>
+                </div>
+              </div>
+            </section>
+          ) : null}
 
           <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
             <article className="rounded-[1.75rem] border border-outline-variant bg-surface p-6 shadow-[0_12px_34px_rgba(58,48,42,0.05)] sm:p-8">

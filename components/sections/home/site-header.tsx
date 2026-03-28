@@ -42,24 +42,24 @@ function getHeaderCta(role?: HeaderRole) {
   switch (role) {
     case "JOB_SEEKER":
       return {
-        label: "Apply for Job Listings",
+        label: "Begin Job Seeking",
         href: "/onboarding/job-seeker",
       };
     case "EMPLOYER":
       return {
-        label: "Post a Job",
+        label: "Become an Employer",
         href: "/onboarding/employer",
       };
     case "ADMIN":
       return {
         label: "System Dashboard",
-        href: "/dashboard",
+        href: "/admin/dashboard",
       };
     case "USER":
     default:
       return {
-        label: "Post a Job",
-        href: "/onboarding/employer",
+        label: "Looking for a Job",
+        href: "/onboarding/job-seeker",
       };
   }
 }

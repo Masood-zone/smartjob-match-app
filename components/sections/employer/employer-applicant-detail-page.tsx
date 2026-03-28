@@ -475,6 +475,8 @@ export function EmployerApplicantDetailPage({
                     <Field label="Date and time">
                       <input
                         type="datetime-local"
+                        title="Interview date and time"
+                        placeholder="Select interview date and time"
                         value={interviewDraft.date}
                         onChange={(event) =>
                           setInterviewDraft((current) =>
@@ -488,6 +490,8 @@ export function EmployerApplicantDetailPage({
                     </Field>
                     <Field label="Location">
                       <input
+                        title="Interview location"
+                        placeholder="Enter interview location"
                         value={interviewDraft.location}
                         onChange={(event) =>
                           setInterviewDraft((current) =>
@@ -501,6 +505,8 @@ export function EmployerApplicantDetailPage({
                     </Field>
                     <Field label="Notes">
                       <textarea
+                        title="Interview notes"
+                        placeholder="Add optional interview notes"
                         value={interviewDraft.notes}
                         onChange={(event) =>
                           setInterviewDraft((current) =>

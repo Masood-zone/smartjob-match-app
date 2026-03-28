@@ -125,6 +125,7 @@ export function AlgorithmConfigForm({
                   className="w-20 rounded-lg border border-border/70 bg-surface px-3 py-2 text-right text-sm outline-none focus:border-[#c2652a]"
                   max={100}
                   min={0}
+                  title={`${field.label} value`}
                   onChange={(event) =>
                     updateWeight(field.key, Number(event.target.value))
                   }
@@ -136,6 +137,7 @@ export function AlgorithmConfigForm({
                 className="w-full accent-[#c2652a]"
                 max={100}
                 min={0}
+                title={`${field.label} slider`}
                 onChange={(event) =>
                   updateWeight(field.key, Number(event.target.value))
                 }
@@ -169,6 +171,7 @@ export function AlgorithmConfigForm({
             <input
               checked={Boolean(config.strictQualification)}
               className="mt-1 h-5 w-5 accent-[#c2652a]"
+              title="Toggle strict qualification"
               onChange={() =>
                 setConfig((current) => ({
                   ...current,
@@ -192,6 +195,7 @@ export function AlgorithmConfigForm({
             <input
               checked={Boolean(config.allowOverqualified)}
               className="mt-1 h-5 w-5 accent-[#c2652a]"
+              title="Toggle overqualified candidates"
               onChange={() =>
                 setConfig((current) => ({
                   ...current,
@@ -215,6 +219,7 @@ export function AlgorithmConfigForm({
             <input
               checked={Boolean(config.allowUnderqualified)}
               className="mt-1 h-5 w-5 accent-[#c2652a]"
+              title="Toggle underqualified candidates"
               onChange={() =>
                 setConfig((current) => ({
                   ...current,
@@ -240,6 +245,7 @@ export function AlgorithmConfigForm({
                 className="w-20 rounded-lg border border-border/70 bg-surface px-3 py-2 text-right text-sm outline-none focus:border-[#c2652a]"
                 max={100}
                 min={0}
+                title="Minimum skill match percent value"
                 onChange={(event) =>
                   setConfig((current) => ({
                     ...current,
@@ -257,6 +263,7 @@ export function AlgorithmConfigForm({
               className="w-full accent-[#c2652a]"
               max={100}
               min={0}
+              title="Minimum skill match percent slider"
               onChange={(event) =>
                 setConfig((current) => ({
                   ...current,

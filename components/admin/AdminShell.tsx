@@ -11,7 +11,7 @@ const navigationItems = [
   { href: "/admin/dashboard", label: "Overview", icon: "dashboard" },
   {
     href: "/admin/job-seekers",
-    label: "Seeker Verification",
+    label: "Job Seeker Verification",
     icon: "how_to_reg",
   },
   {
@@ -114,10 +114,16 @@ export function AdminShell({ children }: AdminShellProps) {
 
           <div className="flex items-center gap-3 sm:gap-5">
             <div className="hidden items-center gap-3 text-on-surface-variant sm:flex">
-              <button className="transition-colors hover:text-[#c2652a]">
+              <button
+                title="notifications-button"
+                className="transition-colors hover:text-[#c2652a]"
+              >
                 <MaterialSymbol icon="notifications" className="text-xl" />
               </button>
-              <button className="transition-colors hover:text-[#c2652a]">
+              <button
+                title="activity-button"
+                className="transition-colors hover:text-[#c2652a]"
+              >
                 <MaterialSymbol icon="history" className="text-xl" />
               </button>
             </div>
