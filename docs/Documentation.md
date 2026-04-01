@@ -68,6 +68,40 @@ Matching is deterministic and based on explicit profile and job data rather than
 
 The matching pipeline is described in `docs/Matching-Algorithm.md` and is triggered by onboarding completion and related profile updates.
 
+### 5. Job qualification matching algorithm
+
+The job qualification matching algorithm is the scoring layer that links job seeker profiles to employer job posts across the system. It works as a pipeline rather than a single score so the platform can explain why a candidate matched, why they were filtered out, and how they compare to other seekers.
+
+The system uses these data sources:
+
+- Job seeker qualification, skills, experience, and location preference from onboarding data
+- Job requirements such as required qualification, title, description, and required skills from job posts
+- Application state and interview state for dashboard and review views
+- Admin-tuned algorithm weights and verification rules from the admin configuration layer
+
+The matching process follows this order:
+
+1. Qualification gate: the system compares the job seeker qualification against the job requirement and rejects or deprioritizes underqualified profiles.
+2. Skills scoring: the system measures overlap between seeker skills and job requirements and adds weighted points.
+3. Experience scoring: the system checks years of experience, role relevance, and keyword similarity in past work history.
+4. Preference scoring: the system checks whether the role fits the seeker’s stated location and preference data.
+5. Final normalization: the score is capped and converted into a readable match band such as excellent, good, average, or low.
+
+The output of the algorithm is stored as a match record and becomes visible in three places:
+
+- Admin view: admins can review matched candidates while overseeing verification and algorithm settings.
+- Employer view: employers see top matches, applicant ranking, and candidate detail cards in their dashboard and applicant screens.
+- Job seeker view: seekers see matched jobs, application progress, and dashboard summaries of their best opportunities.
+
+The algorithm is refreshed when any of these events happen:
+
+- Job seeker onboarding is completed or updated
+- A new job is created or edited
+- An admin approves a job seeker profile
+- The admin changes matching weights or rules
+
+This keeps the platform consistent: the same qualification data that is collected during onboarding is reused by the job listing, matching, application, and dashboard layers.
+
 ## Role Scope
 
 | Module                      | Admin can do                                 | Employer can do                               | Job seeker can do                                        |
