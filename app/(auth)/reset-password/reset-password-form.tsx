@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -15,21 +15,31 @@ type ResetPasswordFormValues = {
   confirmPassword: string;
 };
 
-type ResetPasswordFormProps = {
-  email: string;
-  otp: string;
-};
-
-export function ResetPasswordForm({ email, otp }: ResetPasswordFormProps) {
+export function ResetPasswordForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-
+  const [otp, setOtp] = useState("");
+  const [email, setEmail] = useState("");
   const {
     register,
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<ResetPasswordFormValues>();
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("otp");
+    const emailFromUrl = urlParams.get("email");
+    if (token) {
+      setOtp(token);
+    } else {
+      toast.error("The reset code is missing. Please verify the link again.");
+    }
+    if (emailFromUrl) {
+      setEmail(emailFromUrl);
+    }
+  }, []); // Run only once on component mount
 
   const onSubmit = async (values: ResetPasswordFormValues) => {
     if (values.password !== values.confirmPassword) {
@@ -64,13 +74,13 @@ export function ResetPasswordForm({ email, otp }: ResetPasswordFormProps) {
     <AuthPageShell
       eyebrow="Set a new password"
       title="Finish resetting your password"
-      description="Use the confirmed code to create a fresh password and close the recovery flow."
+      description="Use the reset link from your email to create a fresh password and close the recovery flow."
       highlights={[
         {
           icon: "lock",
           title: "Password change only",
           description:
-            "The code is already verified, so this screen only updates the credential itself.",
+            "The reset link already identifies your recovery attempt, so this screen only updates the credential itself.",
         },
         {
           icon: "security",
@@ -82,10 +92,11 @@ export function ResetPasswordForm({ email, otp }: ResetPasswordFormProps) {
       footnote={
         <div className="space-y-2">
           <p className="text-sm leading-6 text-foreground">
-            Reset codes are tied to the email and OTP you just confirmed.
+            Reset links are tied to the email and token you received in your
+            inbox.
           </p>
           <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-            If the token is missing, return to verification first.
+            If the link is missing, request a new reset email first.
           </p>
         </div>
       }
@@ -182,10 +193,10 @@ export function ResetPasswordForm({ email, otp }: ResetPasswordFormProps) {
             Back to login
           </Link>
           <Link
-            href="/verify-otp?type=forget-password"
+            href="/forgot-password"
             className="font-semibold text-foreground transition-colors hover:text-primary"
           >
-            Verify code again
+            Request another link
           </Link>
         </div>
       </div>

@@ -29,39 +29,37 @@ export default function ForgotPasswordPage() {
       return;
     }
 
-    toast.success("Reset code sent. Check your inbox.");
-    router.push(
-      `/verify-otp?email=${encodeURIComponent(email)}&type=forget-password`,
-    );
+    toast.success("Reset link sent. Check your inbox.");
+    router.push("/login?reset-email-sent=1");
   };
 
   return (
     <AuthPageShell
       eyebrow="Account recovery"
       title="Recover access to your account"
-      description="Request a password reset code and continue through verification before setting a new password."
+      description="Request a password reset link and use it to create a new password."
       highlights={[
         {
           icon: "lock_reset",
-          title: "OTP-first recovery",
+          title: "Link-based recovery",
           description:
-            "The reset flow uses Better Auth's email OTP helpers so the password change step stays separate.",
+            "The reset flow now sends a custom SMTP link instead of relying on the auth client.",
         },
         {
           icon: "shield",
           title: "Safer recovery",
           description:
-            "Codes expire and the reset step requires both the email address and the verification code.",
+            "Reset links expire and the password change step still requires the link token.",
         },
       ]}
       footnote={
         <div className="space-y-2">
           <p className="text-sm leading-6 text-foreground">
-            If your email exists, you’ll receive a code that takes you to the
-            verification step.
+            If your email exists, you’ll receive a reset link that takes you
+            straight to the password update screen.
           </p>
           <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-            No password is changed until the code is confirmed.
+            No password is changed until you open the link and submit a new one.
           </p>
         </div>
       }
@@ -74,8 +72,8 @@ export default function ForgotPasswordPage() {
           <div>
             <h2 className="text-xl text-foreground">Send recovery code</h2>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Enter the email attached to your account and we’ll prepare the
-              next step.
+              Enter the email attached to your account and we’ll email a reset
+              link.
             </p>
           </div>
         </div>
@@ -105,7 +103,7 @@ export default function ForgotPasswordPage() {
             disabled={isSubmitting}
             className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-4 text-sm font-semibold text-primary-foreground shadow-[0_16px_36px_rgba(194,101,42,0.28)] transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isSubmitting ? "Sending code..." : "Send reset code"}
+            {isSubmitting ? "Sending link..." : "Send reset link"}
           </button>
         </form>
 

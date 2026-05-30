@@ -65,9 +65,23 @@ export async function verifyEmailOtp(email: string, otp: string) {
 }
 
 export async function requestPasswordReset(email: string) {
-  return authClient.emailOtp.requestPasswordReset({
-    email,
+  const response = await fetch("/api/auth/forgot-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
   });
+
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok || result.success === false) {
+    return {
+      error: {
+        message: result.message || "Unable to request a password reset link",
+      },
+    };
+  }
+
+  return { error: undefined };
 }
 
 export async function checkVerificationOtp({
@@ -95,9 +109,25 @@ export async function resetPasswordWithOtp({
   otp: string;
   password: string;
 }) {
-  return authClient.emailOtp.resetPassword({
-    email,
-    otp,
-    password,
+  const response = await fetch("/api/auth/reset-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email,
+      otp,
+      password,
+    }),
   });
+
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok || result.success === false) {
+    return {
+      error: {
+        message: result.message || "Unable to update the password",
+      },
+    };
+  }
+
+  return { error: undefined };
 }
