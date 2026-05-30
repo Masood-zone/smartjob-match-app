@@ -21,6 +21,7 @@ import { MaterialSymbol } from "@/components/common/MaterialSymbol";
 import { SiteFooter } from "@/components/sections/home/site-footer";
 import { SiteHeader } from "@/components/sections/home/site-header";
 import { ErdDownloadCenter } from "@/components/sections/resources/erd-download-center";
+import { SystemArchitecturePreview } from "@/components/sections/resources/system-architecture-preview";
 import {
   diagramSubtitle,
   diagramTitle,
@@ -28,6 +29,7 @@ import {
   schemaNodes,
   type SchemaNode,
 } from "@/lib/database/erd-schema";
+import Image from "next/image";
 
 function getNodeStyle(node: SchemaNode) {
   return {
@@ -309,6 +311,29 @@ export function ErdDigramPage() {
                   </div>
                 </div>
               </div>
+            </div>
+            <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+              <div className="rounded-[2rem] border border-outline-variant/40 bg-surface p-6 shadow-sm">
+                <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">
+                  System architecture preview
+                </p>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-on-surface-variant">
+                  The provided architecture SVG is shown below so it can be
+                  reviewed, downloaded, and reused without leaving the page.
+                </p>
+                <div className="mt-6 overflow-hidden rounded-[1.75rem] border border-outline-variant/40 bg-[#fcf8f2]">
+                  <Image
+                    src="/system-architecture.svg"
+                    alt="System architecture diagram preview"
+                    width={1770}
+                    height={1910}
+                    unoptimized
+                    className="h-auto w-full"
+                  />
+                </div>
+              </div>
+
+              <SystemArchitecturePreview compact />
             </div>
           </div>
         </div>
