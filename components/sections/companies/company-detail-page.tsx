@@ -90,10 +90,10 @@ export function CompanyDetailPage({ companyId }: { companyId: string }) {
                     />
                   </Link>
                   <Link
-                    href="/dashboard/job-seeker/companies"
+                    href="/companies"
                     className="inline-flex items-center gap-2 rounded-full border border-outline-variant bg-surface px-4 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-on-surface-variant"
                   >
-                    Back to directory
+                    Back to companies
                   </Link>
                 </div>
               </div>

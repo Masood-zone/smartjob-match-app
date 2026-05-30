@@ -64,23 +64,29 @@ function matchesIndustry(industry: string, companyIndustry: string) {
   );
 }
 
-function matchesExperienceBand(qualification: QualificationLevel, experience: string) {
+function matchesExperienceBand(
+  qualification: QualificationLevel,
+  experience: string,
+) {
   if (!experience) {
     return true;
   }
 
   switch (experience) {
     case "ENTRY":
-      return [QualificationLevel.BECE, QualificationLevel.WASSCE].includes(
-        qualification,
+      return (
+        qualification === QualificationLevel.BECE ||
+        qualification === QualificationLevel.WASSCE
       );
     case "MID":
-      return [QualificationLevel.DIPLOMA, QualificationLevel.DEGREE].includes(
-        qualification,
+      return (
+        qualification === QualificationLevel.DIPLOMA ||
+        qualification === QualificationLevel.DEGREE
       );
     case "SENIOR":
-      return [QualificationLevel.MASTERS, QualificationLevel.PHD].includes(
-        qualification,
+      return (
+        qualification === QualificationLevel.MASTERS ||
+        qualification === QualificationLevel.PHD
       );
     default:
       return true;
@@ -296,12 +302,14 @@ export async function GET(request: Request) {
       })
       .filter((job) => matchesIndustry(industry, job.companyIndustry))
       .filter((job) =>
-        matchesExperienceBand(job.requiredQualification as QualificationLevel, experience),
+        matchesExperienceBand(
+          job.requiredQualification as QualificationLevel,
+          experience,
+        ),
       )
       .filter((job) =>
         matchesLocation(locationFilter, job.location, job.companyLocation),
-      
-  );
+      );
 
     return NextResponse.json({ data });
   } catch (error) {

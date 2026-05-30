@@ -26,41 +26,43 @@ function getCompanyInitials(companyName: string) {
     .toUpperCase();
 }
 
-function matchesIndustry(jobIndustry: string, filters: string[]) {
-  if (filters.length === 0) {
-    return true;
-  }
+// function matchesIndustry(jobIndustry: string, filters: string[]) {
+//   if (filters.length === 0) {
+//     return true;
+//   }
 
-  const normalizedIndustry = jobIndustry.toLowerCase();
-  const keywordMap: Record<string, string[]> = {
-    Technology: ["tech", "software", "data", "it", "digital"],
-    Creative: ["creative", "design", "media", "marketing", "brand"],
-    Finance: ["finance", "fintech", "bank", "capital", "investment"],
-    Operations: [
-      "operations",
-      "logistics",
-      "supply",
-      "manufacturing",
-      "construction",
-    ],
-  };
+//   const normalizedIndustry = jobIndustry.toLowerCase();
+//   const keywordMap: Record<string, string[]> = {
+//     Technology: ["tech", "software", "data", "it", "digital"],
+//     Creative: ["creative", "design", "media", "marketing", "brand"],
+//     Finance: ["finance", "fintech", "bank", "capital", "investment"],
+//     Operations: [
+//       "operations",
+//       "logistics",
+//       "supply",
+//       "manufacturing",
+//       "construction",
+//     ],
+//   };
 
-  return filters.some((filter) => {
-    const keywords = keywordMap[filter] ?? [];
+//   return filters.some((filter) => {
+//     const keywords = keywordMap[filter] ?? [];
 
-    return (
-      normalizedIndustry.includes(filter.toLowerCase()) ||
-      keywords.some((keyword) => normalizedIndustry.includes(keyword))
-    );
-  });
-}
+//     return (
+//       normalizedIndustry.includes(filter.toLowerCase()) ||
+//       keywords.some((keyword) => normalizedIndustry.includes(keyword))
+//     );
+//   });
+// }
 
 export function JobsBrowserPage() {
   const [search, setSearch] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedExperience, setSelectedExperience] = useState("");
   const [pageIndex, setPageIndex] = useState(0);
-  const [applicationSentJobId, setApplicationSentJobId] = useState<string | null>(null);
+  const [applicationSentJobId, setApplicationSentJobId] = useState<
+    string | null
+  >(null);
 
   const { data, isLoading, isError, error, refetch } = useJobsQuery({
     query: search,
@@ -75,10 +77,6 @@ export function JobsBrowserPage() {
     () => new Set(jobs.map((job) => job.companyName)).size,
     [jobs],
   );
-
-  useEffect(() => {
-    setPageIndex(0);
-  }, [search, selectedIndustries.join("|"), selectedExperience]);
 
   useEffect(() => {
     if (!applicationSentJobId) {
@@ -97,10 +95,10 @@ export function JobsBrowserPage() {
   }, [applicationSentJobId]);
 
   const totalPages = Math.max(1, Math.ceil(jobs.length / pageSize));
-  const visibleJobs = jobs.slice(
-    pageIndex * pageSize,
-    pageIndex * pageSize + pageSize,
-  );
+  // const visibleJobs = jobs.slice(
+  //   pageIndex * pageSize,
+  //   pageIndex * pageSize + pageSize,
+  // );
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
@@ -112,7 +110,7 @@ export function JobsBrowserPage() {
             Your next chapter, <br />
             <span className="italic text-primary">curated with intent.</span>
           </h1>
-          <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-secondary">
+          <p className="mt-6 max-w-2xl text-lg font-light leading-relaxed ">
             Discover roles that align with your expertise and values. Our
             matching engine keeps the filters readable, fast, and tied to the
             underlying job data.
@@ -128,7 +126,10 @@ export function JobsBrowserPage() {
               />
               <input
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) => {
+                  setPageIndex(0);
+                  setSearch(event.target.value);
+                }}
                 placeholder="Search by title, company, skill, or location..."
                 className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest py-3 pl-12 pr-4 text-sm outline-none transition-all focus:border-primary"
               />
@@ -141,23 +142,39 @@ export function JobsBrowserPage() {
         </section>
 
         <section className="mb-12 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <SummaryCard label="Visible jobs" value={isLoading ? "—" : String(jobs.length)} icon="work" />
-          <SummaryCard label="Verified employers" value={isLoading ? "—" : String(employerCount)} icon="business" />
-          <SummaryCard label="Quick match focus" value="Qualification first" icon="auto_awesome" />
+          <SummaryCard
+            label="Visible jobs"
+            value={isLoading ? "—" : String(jobs.length)}
+            icon="work"
+          />
+          <SummaryCard
+            label="Verified employers"
+            value={isLoading ? "—" : String(employerCount)}
+            icon="business"
+          />
+          <SummaryCard
+            label="Quick match focus"
+            value="Qualification first"
+            icon="auto_awesome"
+          />
         </section>
 
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
           <aside className="space-y-8 lg:col-span-3">
             <div>
-              <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.3em] text-secondary">
+              <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.3em] ">
                 Categories
               </h3>
               <div className="space-y-3">
                 {INDUSTRY_FILTERS.map((industry) => (
-                  <label key={industry} className="flex cursor-pointer items-center gap-3 group">
+                  <label
+                    key={industry}
+                    className="flex cursor-pointer items-center gap-3 group"
+                  >
                     <input
                       checked={selectedIndustries.includes(industry)}
                       onChange={(event) => {
+                        setPageIndex(0);
                         setSelectedIndustries((current) =>
                           event.target.checked
                             ? [...current, industry]
@@ -176,14 +193,17 @@ export function JobsBrowserPage() {
             </div>
 
             <div className="border-t border-outline-variant/40 pt-8">
-              <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.3em] text-secondary">
+              <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.3em] ">
                 Experience
               </h3>
               <div className="space-y-3">
                 <label className="flex cursor-pointer items-center gap-3 group">
                   <input
                     checked={selectedExperience === ""}
-                    onChange={() => setSelectedExperience("")}
+                    onChange={() => {
+                      setPageIndex(0);
+                      setSelectedExperience("");
+                    }}
                     className="h-5 w-5 border-outline-variant text-primary focus:ring-primary"
                     name="experience"
                     type="radio"
@@ -193,10 +213,16 @@ export function JobsBrowserPage() {
                   </span>
                 </label>
                 {EXPERIENCE_FILTERS.map((option) => (
-                  <label key={option.value} className="flex cursor-pointer items-center gap-3 group">
+                  <label
+                    key={option.value}
+                    className="flex cursor-pointer items-center gap-3 group"
+                  >
                     <input
                       checked={selectedExperience === option.value}
-                      onChange={() => setSelectedExperience(option.value)}
+                      onChange={() => {
+                        setPageIndex(0);
+                        setSelectedExperience(option.value);
+                      }}
                       className="h-5 w-5 border-outline-variant text-primary focus:ring-primary"
                       name="experience"
                       type="radio"
@@ -214,12 +240,18 @@ export function JobsBrowserPage() {
                 <h4 className="mb-2 font-headline text-xl text-on-primary-fixed-variant">
                   Build your career profile
                 </h4>
-                <p className="mb-4 text-xs text-secondary">
+                <p className="mb-4 text-xs ">
                   Let top companies find you through our priority network.
                 </p>
-                <Link href="/onboarding/job-seeker/dashboard" className="inline-flex items-center gap-2 text-sm font-bold text-primary">
+                <Link
+                  href="/onboarding/job-seeker/dashboard"
+                  className="inline-flex items-center gap-2 text-sm font-bold text-primary"
+                >
                   Get Started
-                  <MaterialSymbol icon="arrow_forward" className="text-[16px]" />
+                  <MaterialSymbol
+                    icon="arrow_forward"
+                    className="text-[16px]"
+                  />
                 </Link>
               </div>
               <div className="absolute -right-4 -bottom-4 opacity-10">
@@ -230,8 +262,10 @@ export function JobsBrowserPage() {
 
           <section className="lg:col-span-9">
             <div className="mb-8 flex items-end justify-between gap-4">
-              <p className="font-body text-secondary">
-                Showing <span className="font-bold text-on-surface">{jobs.length}</span> open opportunities
+              <p className="font-body ">
+                Showing{" "}
+                <span className="font-bold text-on-surface">{jobs.length}</span>{" "}
+                open opportunities
               </p>
               <div className="flex gap-2">
                 <button className="rounded-lg border border-outline-variant p-2 transition-colors hover:bg-surface-container">
@@ -267,97 +301,108 @@ export function JobsBrowserPage() {
                       className="h-72 animate-pulse rounded-2xl border border-outline-variant bg-surface-container-lowest"
                     />
                   ))
-                : jobs.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize).map((job, index) => (
-                    <article
-                      key={job.id}
-                      className={`group rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-8 shadow-[0_2px_16px_rgba(58,48,42,0.04)] transition-all hover:shadow-xl hover:shadow-primary/5 ${index === 1 ? "lg:row-span-2" : ""}`}
-                    >
-                      <div className="mb-8 flex items-start justify-between gap-4">
-                        <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-primary-fixed text-primary">
-                          {job.companyLogoUrl ? (
-                            <Image
-                              src={job.companyLogoUrl}
-                              alt={job.companyName}
-                              width={56}
-                              height={56}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <span className="text-sm font-semibold">
-                              {getCompanyInitials(job.companyName)}
+                : jobs
+                    .slice(
+                      pageIndex * pageSize,
+                      pageIndex * pageSize + pageSize,
+                    )
+                    .map((job, index) => (
+                      <article
+                        key={job.id}
+                        className={`group rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-8 shadow-[0_2px_16px_rgba(58,48,42,0.04)] transition-all hover:shadow-xl hover:shadow-primary/5 ${index === 1 ? "lg:row-span-2" : ""}`}
+                      >
+                        <div className="mb-8 flex items-start justify-between gap-4">
+                          <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-primary-fixed text-primary">
+                            {job.companyLogoUrl ? (
+                              <Image
+                                src={job.companyLogoUrl}
+                                alt={job.companyName}
+                                width={56}
+                                height={56}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-sm font-semibold">
+                                {getCompanyInitials(job.companyName)}
+                              </span>
+                            )}
+                          </div>
+                          <span className="rounded-full bg-tertiary-fixed px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-tertiary">
+                            {job.companyIndustry}
+                          </span>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-headline text-2xl text-on-surface transition-colors group-hover:text-primary">
+                              {job.title}
+                            </h3>
+                            <span className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.26em] text-primary">
+                              {job.topMatchScore.toFixed(0)}% match
                             </span>
-                          )}
-                        </div>
-                        <span className="rounded-full bg-tertiary-fixed px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-tertiary">
-                          {job.companyIndustry}
-                        </span>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-headline text-2xl text-on-surface transition-colors group-hover:text-primary">
-                            {job.title}
-                          </h3>
-                          <span className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.26em] text-primary">
-                            {job.topMatchScore.toFixed(0)}% match
-                          </span>
-                        </div>
-                        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-secondary">
-                          {job.companyName}
-                        </p>
-                        <p className="text-sm leading-relaxed text-secondary">
-                          {job.description}
-                        </p>
-                      </div>
-
-                      <div className="mt-6 flex flex-wrap gap-2">
-                        {job.requiredSkills.slice(0, 5).map((skill) => (
-                          <span
-                            key={skill}
-                            className="rounded-full border border-outline-variant bg-surface px-3 py-1 text-[11px] font-medium text-secondary"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="mt-6 border-t border-outline-variant pt-6">
-                        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 text-sm text-secondary">
-                          <span>{job.location}</span>
-                          <span>{job.requiredQualification}</span>
+                          </div>
+                          <p className="text-sm font-semibold uppercase tracking-[0.24em] ">
+                            {job.companyName}
+                          </p>
+                          <p className="text-sm leading-relaxed ">
+                            {job.description}
+                          </p>
                         </div>
 
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <Link
-                            href={`/companies/${job.employerId}`}
-                            className="text-sm font-bold text-primary transition-colors hover:text-tertiary"
-                          >
-                            Company profile
-                          </Link>
-                          <button
-                            type="button"
-                            disabled={applyMutation.isPending}
-                            onClick={() =>
-                              applyMutation.mutate(job.id, {
-                                onSuccess: () => setApplicationSentJobId(job.id),
-                              })
-                            }
-                            className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-on-primary transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            Apply now
-                            <MaterialSymbol icon="send" className="text-[16px]" />
-                          </button>
+                        <div className="mt-6 flex flex-wrap gap-2">
+                          {job.requiredSkills.slice(0, 5).map((skill) => (
+                            <span
+                              key={skill}
+                              className="rounded-full border border-outline-variant bg-surface px-3 py-1 text-[11px] font-medium "
+                            >
+                              {skill}
+                            </span>
+                          ))}
                         </div>
-                      </div>
-                    </article>
-                  ))}
+
+                        <div className="mt-6 border-t border-outline-variant pt-6">
+                          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 text-sm ">
+                            <span>{job.location}</span>
+                            <span>{job.requiredQualification}</span>
+                          </div>
+
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <Link
+                              href={`/companies/${job.employerId}`}
+                              className="text-sm font-bold text-primary transition-colors hover:text-tertiary"
+                            >
+                              Company profile
+                            </Link>
+                            <button
+                              type="button"
+                              disabled={applyMutation.isPending}
+                              onClick={() =>
+                                applyMutation.mutate(job.id, {
+                                  onSuccess: () =>
+                                    setApplicationSentJobId(job.id),
+                                })
+                              }
+                              className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-on-primary transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              Apply now
+                              <MaterialSymbol
+                                icon="send"
+                                className="text-[16px]"
+                              />
+                            </button>
+                          </div>
+                        </div>
+                      </article>
+                    ))}
             </div>
 
             {!isLoading && jobs.length > 0 ? (
               <div className="mt-12 flex justify-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setPageIndex((current) => Math.max(0, current - 1))}
+                  onClick={() =>
+                    setPageIndex((current) => Math.max(0, current - 1))
+                  }
                   disabled={pageIndex === 0}
                   className="flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant transition-colors hover:bg-surface-container disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -366,7 +411,9 @@ export function JobsBrowserPage() {
                 <button className="h-10 w-10 rounded-lg bg-primary font-bold text-on-primary">
                   {pageIndex + 1}
                 </button>
-                {Array.from({ length: Math.min(2, Math.max(totalPages - 1, 0)) }).map((_, index) => (
+                {Array.from({
+                  length: Math.min(2, Math.max(totalPages - 1, 0)),
+                }).map((_, index) => (
                   <button
                     key={`page-${index}`}
                     type="button"
@@ -378,17 +425,24 @@ export function JobsBrowserPage() {
                 ))}
                 <button
                   type="button"
-                  onClick={() => setPageIndex((current) => Math.min(totalPages - 1, current + 1))}
+                  onClick={() =>
+                    setPageIndex((current) =>
+                      Math.min(totalPages - 1, current + 1),
+                    )
+                  }
                   disabled={pageIndex >= totalPages - 1}
                   className="flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant transition-colors hover:bg-surface-container disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <MaterialSymbol icon="chevron_right" className="text-[20px]" />
+                  <MaterialSymbol
+                    icon="chevron_right"
+                    className="text-[20px]"
+                  />
                 </button>
               </div>
             ) : null}
 
             {!isLoading && jobs.length === 0 ? (
-              <section className="rounded-[1.5rem] border border-dashed border-outline-variant bg-surface p-8 text-center text-secondary">
+              <section className="rounded-[1.5rem] border border-dashed border-outline-variant bg-surface p-8 text-center ">
                 No jobs matched your search.
               </section>
             ) : null}
@@ -407,16 +461,28 @@ export function JobsBrowserPage() {
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-8 text-sm text-stone-500 dark:text-stone-400">
-            <Link href="#" className="transition-colors hover:text-[#c2652a] hover:underline">
+            <Link
+              href="#"
+              className="transition-colors hover:text-[#c2652a] hover:underline"
+            >
               Privacy
             </Link>
-            <Link href="#" className="transition-colors hover:text-[#c2652a] hover:underline">
+            <Link
+              href="#"
+              className="transition-colors hover:text-[#c2652a] hover:underline"
+            >
               Terms
             </Link>
-            <Link href="#" className="transition-colors hover:text-[#c2652a] hover:underline">
+            <Link
+              href="#"
+              className="transition-colors hover:text-[#c2652a] hover:underline"
+            >
               Careers
             </Link>
-            <Link href="#" className="transition-colors hover:text-[#c2652a] hover:underline">
+            <Link
+              href="#"
+              className="transition-colors hover:text-[#c2652a] hover:underline"
+            >
               Contact
             </Link>
           </div>
@@ -424,7 +490,7 @@ export function JobsBrowserPage() {
       </footer>
 
       {applicationSentJobId ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-on-surface/40 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-on-surface/40 p-4 backdrop-blur-sm">
           <button
             type="button"
             aria-label="Close success modal"
@@ -433,12 +499,16 @@ export function JobsBrowserPage() {
           />
           <div className="relative w-full max-w-md rounded-3xl border border-outline-variant bg-surface p-10 text-center shadow-2xl">
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-              <MaterialSymbol icon="check_circle" filled className="text-[40px] text-primary" />
+              <MaterialSymbol
+                icon="check_circle"
+                filled
+                className="text-[40px] text-primary"
+              />
             </div>
             <h2 className="mb-4 text-3xl text-on-surface">Application Sent</h2>
-            <p className="mb-8 leading-relaxed text-secondary">
-              Your application for this role has been submitted. You will get
-              an update soon.
+            <p className="mb-8 leading-relaxed ">
+              Your application for this role has been submitted. You will get an
+              update soon.
             </p>
             <button
               type="button"
@@ -470,7 +540,9 @@ function SummaryCard({
           <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
             {label}
           </p>
-          <p className="mt-3 text-3xl tracking-tight text-on-surface">{value}</p>
+          <p className="mt-3 text-3xl tracking-tight text-on-surface">
+            {value}
+          </p>
         </div>
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <MaterialSymbol icon={icon} className="text-[22px]" />
