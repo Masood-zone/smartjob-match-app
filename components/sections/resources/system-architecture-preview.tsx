@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Document, ImageRun, Paragraph, Packer, TextRun } from "docx";
 import { jsPDF } from "jspdf";
-import Image from "next/image";
+import NextImage from "next/image";
 
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
 import { Button } from "@/components/ui/button";
@@ -140,6 +140,7 @@ async function exportPreview(format: DownloadFormat) {
           new Paragraph({
             children: [
               new ImageRun({
+                type: "png",
                 data: rasterized.pngArrayBuffer,
                 transformation: {
                   width: Math.round(rasterized.width * scale),
@@ -221,7 +222,7 @@ export function SystemArchitecturePreview({
       ) : null}
 
       <div className="overflow-hidden rounded-[1.75rem] border border-outline-variant/40 bg-[#fcf8f2]">
-        <Image
+        <NextImage
           src="/system-architecture.svg"
           alt="System architecture diagram preview"
           width={1770}
