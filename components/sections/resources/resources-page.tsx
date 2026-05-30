@@ -1,8 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 import { MaterialSymbol } from "@/components/common/MaterialSymbol";
+import { ErdDownloadCenter } from "@/components/sections/resources/erd-download-center";
 import { SiteFooter } from "@/components/sections/home/site-footer";
 import { SiteHeader } from "@/components/sections/home/site-header";
 
@@ -251,6 +253,40 @@ export function ResourcesPage() {
               ))}
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      <section className="px-6 pb-24">
+        <div className="mx-auto grid max-w-7xl gap-6 rounded-[2rem] border border-outline-variant/40 bg-surface p-6 shadow-sm lg:grid-cols-[0.9fr_1.1fr] lg:p-8">
+          <div className="space-y-5">
+            <span className="text-xs font-bold uppercase tracking-[0.32em] text-primary">
+              Supervisor handoff
+            </span>
+            <h2 className="text-4xl tracking-tight text-on-surface sm:text-5xl">
+              Download the ERD in the format you need.
+            </h2>
+            <p className="max-w-2xl leading-relaxed text-on-surface-variant">
+              Open the interactive diagram or export a preview file for slides,
+              review packets, and editable documentation.
+            </p>
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/database/erd-digram"
+                className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                Open interactive ERD
+              </Link>
+              <Link
+                href="/database/erd-digram"
+                className="rounded-full border border-outline-variant/50 bg-surface px-5 py-3 text-sm font-semibold text-on-surface transition-colors hover:border-primary hover:text-primary"
+              >
+                Preview diagram
+              </Link>
+            </div>
+          </div>
+
+          <ErdDownloadCenter compact />
         </div>
       </section>
 

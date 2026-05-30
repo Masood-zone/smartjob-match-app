@@ -36,6 +36,15 @@ export interface CreateJobInput {
   requiredSkills: string[];
 }
 
+export interface JobQueryParams {
+  employerId?: string;
+  companyId?: string;
+  query?: string;
+  industry?: string;
+  experience?: string;
+  location?: string;
+}
+
 export interface JobApplicantSeeker {
   id: string;
   userId: string;
@@ -117,11 +126,7 @@ function useAuthScope() {
   return session?.user?.id ? `user:${session.user.id}` : "anonymous";
 }
 
-async function fetchJobs(params?: {
-  employerId?: string;
-  companyId?: string;
-  query?: string;
-}) {
+async function fetchJobs(params?: JobQueryParams) {
   try {
     const response = await api.get<{ data: JobRecord[] }>("/api/jobs", {
       params: params ?? undefined,
@@ -158,11 +163,7 @@ async function fetchJobApplicants(jobId: string) {
   }
 }
 
-export function useJobsQuery(params?: {
-  employerId?: string;
-  companyId?: string;
-  query?: string;
-}) {
+export function useJobsQuery(params?: JobQueryParams) {
   const authScope = useAuthScope();
 
   return useQuery({

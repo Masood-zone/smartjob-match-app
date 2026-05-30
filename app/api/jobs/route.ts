@@ -35,6 +35,70 @@ function toString(value: unknown, fallback = "") {
     : fallback;
 }
 
+function matchesIndustry(industry: string, companyIndustry: string) {
+  if (!industry) {
+    return true;
+  }
+
+  const normalizedIndustry = industry.toLowerCase();
+  const normalizedCompanyIndustry = companyIndustry.toLowerCase();
+
+  const map: Record<string, string[]> = {
+    technology: ["tech", "software", "data", "it", "digital"],
+    creative: ["creative", "design", "media", "marketing", "brand"],
+    finance: ["finance", "fintech", "bank", "capital", "investment"],
+    operations: [
+      "operations",
+      "logistics",
+      "supply",
+      "manufacturing",
+      "construction",
+    ],
+  };
+
+  return (
+    normalizedCompanyIndustry.includes(normalizedIndustry) ||
+    (map[normalizedIndustry]?.some((keyword) =>
+      normalizedCompanyIndustry.includes(keyword),
+    ) ?? false)
+  );
+}
+
+function matchesExperienceBand(qualification: QualificationLevel, experience: string) {
+  if (!experience) {
+    return true;
+  }
+
+  switch (experience) {
+    case "ENTRY":
+      return [QualificationLevel.BECE, QualificationLevel.WASSCE].includes(
+        qualification,
+      );
+    case "MID":
+      return [QualificationLevel.DIPLOMA, QualificationLevel.DEGREE].includes(
+        qualification,
+      );
+    case "SENIOR":
+      return [QualificationLevel.MASTERS, QualificationLevel.PHD].includes(
+        qualification,
+      );
+    default:
+      return true;
+  }
+}
+
+function matchesLocation(location: string, jobLocation: string, companyLocation: string) {
+  if (!location) {
+    return true;
+  }
+
+  const normalizedLocation = location.toLowerCase();
+
+  return [jobLocation, companyLocation].some((entry) =>
+    entry.toLowerCase().includes(normalizedLocation),
+  );
+}
+
 function formatEmployer(employer: {
   id: string;
   companyName: string | null;
@@ -97,6 +161,9 @@ export async function GET(request: Request) {
     const employerId = searchParams.get("employerId")?.trim() || undefined;
     const companyId = searchParams.get("companyId")?.trim() || undefined;
     const query = searchParams.get("query")?.trim().toLowerCase() || "";
+    const industry = searchParams.get("industry")?.trim() || "";
+    const experience = searchParams.get("experience")?.trim().toUpperCase() || "";
+    const locationFilter = searchParams.get("location")?.trim() || "";
 
     const where =
       employerId || companyId
@@ -226,7 +293,15 @@ export async function GET(request: Request) {
           .join(" ")
           .toLowerCase()
           .includes(query);
-      });
+      })
+      .filter((job) => matchesIndustry(industry, job.companyIndustry))
+      .filter((job) =>
+        matchesExperienceBand(job.requiredQualification as QualificationLevel, experience),
+      )
+      .filter((job) =>
+        matchesLocation(locationFilter, job.location, job.companyLocation),
+      
+  );
 
     return NextResponse.json({ data });
   } catch (error) {

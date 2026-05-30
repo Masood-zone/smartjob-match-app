@@ -163,7 +163,7 @@ export function SessionAvatarBadge({
               onClick={onNavigate}
               className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
             >
-              Sign in
+              Login
             </Link>
             <Link
               href="/register"

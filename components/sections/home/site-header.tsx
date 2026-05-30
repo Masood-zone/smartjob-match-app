@@ -14,7 +14,7 @@ const navigationItems = [
   { label: "Jobs", href: "/jobs" },
   { label: "Companies", href: "/companies" },
   { label: "About", href: "/about" },
-  { label: "Resources", href: "/resources" },
+  { label: "Resources", href: "/database/erd-diagram" },
 ];
 
 type HeaderRole = "USER" | "JOB_SEEKER" | "EMPLOYER" | "ADMIN";
@@ -74,10 +74,6 @@ export function SiteHeader() {
   const primaryCta = getHeaderCta(userRole);
 
   useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
     if (!mobileMenuOpen) {
       return;
     }
@@ -100,12 +96,12 @@ export function SiteHeader() {
   }, [mobileMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#d8d0c8]/60 bg-[#faf5ee]/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-[#d8d0c8]/60 bg-[#faf5ee]/96 text-stone-900 shadow-[0_2px_16px_rgba(58,48,42,0.04)] backdrop-blur-xl">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-4 sm:gap-12">
           <Link
             href="#hero"
-            className="shrink-0 font-serif text-2xl font-bold tracking-tight text-primary sm:text-[2rem]"
+            className="shrink-0 font-serif text-2xl font-bold tracking-tight text-[#c2652a] sm:text-[2rem]"
           >
             Qualify
           </Link>
@@ -117,8 +113,8 @@ export function SiteHeader() {
                 href={item.href}
                 className={
                   pathname === item.href
-                    ? "border-b-2 border-primary pb-1 text-sm font-semibold text-primary"
-                    : "text-sm text-stone-600 transition-colors hover:text-primary"
+                    ? "border-b-2 border-[#c2652a] pb-1 text-sm font-semibold text-[#c2652a]"
+                    : "text-sm font-medium text-stone-700 transition-colors hover:text-[#c2652a]"
                 }
               >
                 {item.label}
@@ -133,7 +129,7 @@ export function SiteHeader() {
           </div>
           <Link
             href={primaryCta.href}
-            className="hidden cursor-pointer rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 sm:inline-flex"
+            className="hidden cursor-pointer rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-[0_10px_24px_rgba(194,101,42,0.18)] transition-colors hover:bg-[#b85c23] sm:inline-flex"
           >
             {primaryCta.label}
           </Link>
@@ -197,8 +193,8 @@ export function SiteHeader() {
                   onClick={() => setMobileMenuOpen(false)}
                   className={
                     pathname === item.href
-                      ? "cursor-pointer rounded-[1.1rem] bg-primary/10 px-4 py-4 text-base font-semibold text-primary ring-1 ring-primary/10"
-                      : "cursor-pointer rounded-[1.1rem] px-4 py-4 text-base text-stone-700 transition-colors hover:bg-primary/5 hover:text-primary"
+                      ? "cursor-pointer rounded-[1.1rem] bg-primary/10 px-4 py-4 text-base font-semibold text-[#c2652a] ring-1 ring-primary/10"
+                      : "cursor-pointer rounded-[1.1rem] px-4 py-4 text-base text-stone-800 transition-colors hover:bg-primary/5 hover:text-[#c2652a]"
                   }
                 >
                   {item.label}
