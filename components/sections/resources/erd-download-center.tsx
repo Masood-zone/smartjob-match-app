@@ -15,6 +15,7 @@ async function svgToImageData(svgMarkup: string) {
   const blob = new Blob([svgMarkup], {
     type: "image/svg+xml;charset=utf-8",
   });
+
   const objectUrl = URL.createObjectURL(blob);
 
   try {
@@ -28,6 +29,7 @@ async function svgToImageData(svgMarkup: string) {
     image.src = objectUrl;
 
     const loadedImage = await imagePromise;
+
     const canvas = document.createElement("canvas");
     canvas.width = diagramSize.width;
     canvas.height = diagramSize.height;
@@ -51,10 +53,12 @@ async function svgToImageData(svgMarkup: string) {
       }, "image/png");
     });
 
+    const pngArrayBuffer = await pngBlob.arrayBuffer();
+
     return {
       pngBlob,
       pngDataUrl: canvas.toDataURL("image/png"),
-      pngArrayBuffer: await pngBlob.arrayBuffer(),
+      pngArrayBuffer,
     };
   } finally {
     URL.revokeObjectURL(objectUrl);
@@ -96,11 +100,16 @@ async function exportDiagram(format: DownloadFormat) {
       diagramSize.width,
       diagramSize.height,
     );
+
     pdf.save("smart-job-matching-erd.pdf");
     return;
   }
 
   const scale = Math.min(1, 1020 / diagramSize.width);
+
+  // ✅ CRITICAL FIX: ArrayBuffer → Uint8Array
+  const imageBuffer = new Uint8Array(pngArrayBuffer);
+
   const documentFile = new Document({
     sections: [
       {
@@ -114,6 +123,7 @@ async function exportDiagram(format: DownloadFormat) {
               }),
             ],
           }),
+
           new Paragraph({
             children: [
               new TextRun({
@@ -123,10 +133,12 @@ async function exportDiagram(format: DownloadFormat) {
               }),
             ],
           }),
+
           new Paragraph({
             children: [
               new ImageRun({
-                data: pngArrayBuffer,
+                type: "png",
+                data: imageBuffer,
                 transformation: {
                   width: Math.round(diagramSize.width * scale),
                   height: Math.round(diagramSize.height * scale),
@@ -220,16 +232,19 @@ export function ErdDownloadCenter({ compact = false }: ErdDownloadCenterProps) {
             }}
           >
             <MaterialSymbol icon={item.icon} className="text-[20px]" />
+
             <span className="flex min-w-0 flex-1 flex-col items-start">
               <span className="text-sm font-semibold tracking-tight">
                 {item.label}
               </span>
+
               {!compact ? (
                 <span className="text-xs font-normal text-on-surface-variant">
                   {item.description}
                 </span>
               ) : null}
             </span>
+
             {activeFormat === item.format ? (
               <span className="text-[11px] uppercase tracking-[0.24em] text-primary">
                 Exporting
